@@ -1,0 +1,25 @@
+.bar {
+  background: var(--navy);
+  color: rgba(247, 243, 235, 0.92);
+  font-size: 0.625rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  padding: 0.55rem 1rem;
+  text-align: center;
+}
+
+.inner {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem 0.85rem;
+}
+
+.dot {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--gold);
+  opacity: 0.85;
+}

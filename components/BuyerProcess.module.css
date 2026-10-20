@@ -1,0 +1,74 @@
+.steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.85rem;
+}
+
+.card {
+  background: var(--white);
+  border: 1px solid rgba(179, 147, 93, 0.2);
+  padding: 1.35rem 1rem;
+  height: 100%;
+  text-align: center;
+  transition: box-shadow var(--transition), transform var(--transition);
+}
+
+.card:hover {
+  box-shadow: var(--shadow-soft);
+  transform: translateY(-2px);
+}
+
+.iconWrap {
+  width: 2.75rem;
+  height: 2.75rem;
+  margin: 0 auto 0.65rem;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 1px solid rgba(179, 147, 93, 0.35);
+  color: var(--burgundy);
+}
+
+.num {
+  font-family: var(--font-heading);
+  font-size: 0.875rem;
+  color: var(--gold);
+}
+
+.card h3 {
+  margin: 0.35rem 0 0.25rem;
+  font-size: 1.05rem;
+}
+
+.card p {
+  margin: 0;
+  color: var(--grey);
+  font-size: 0.8125rem;
+}
+
+.ctaWrap {
+  margin-top: 2rem;
+  display: flex;
+  justify-content: center;
+}
+
+@media (max-width: 960px) {
+  .steps {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 560px) {
+  .steps {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card:hover {
+    transform: none;
+  }
+}

@@ -1,0 +1,144 @@
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgba(247, 243, 235, 0.92);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid transparent;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+.scrolled {
+  border-bottom-color: rgba(179, 147, 93, 0.25);
+  box-shadow: 0 8px 30px rgba(23, 42, 58, 0.06);
+}
+
+.inner {
+  width: var(--container);
+  margin-inline: auto;
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 0;
+}
+
+.brand {
+  text-decoration: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.wordmark {
+  font-family: var(--font-heading);
+  font-size: 1.65rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--navy);
+  line-height: 1;
+}
+
+.descriptor {
+  font-size: 0.5625rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--grey);
+}
+
+.desktopNav ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  gap: 1.75rem;
+}
+
+.desktopNav a {
+  text-decoration: none;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--navy);
+  letter-spacing: 0.02em;
+  transition: color var(--transition);
+}
+
+.desktopNav a:hover {
+  color: var(--burgundy);
+}
+
+.cta {
+  padding: 0.7rem 1.1rem;
+  font-size: 0.6875rem;
+}
+
+.menuBtn {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--navy);
+  padding: 0.35rem;
+  cursor: pointer;
+}
+
+.mobileNav {
+  display: none;
+  border-top: 1px solid rgba(179, 147, 93, 0.2);
+  background: var(--ivory);
+}
+
+.mobileNav ul {
+  list-style: none;
+  margin: 0;
+  padding: 1rem 1.25rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.mobileNav a {
+  display: block;
+  padding: 0.85rem 0;
+  text-decoration: none;
+  font-weight: 500;
+  color: var(--navy);
+  border-bottom: 1px solid rgba(23, 42, 58, 0.06);
+}
+
+.mobileCta {
+  margin-top: 0.5rem;
+  text-align: center;
+  background: var(--navy) !important;
+  color: var(--white) !important;
+  padding: 0.95rem 1rem !important;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 0.75rem !important;
+  border: none !important;
+}
+
+@media (max-width: 960px) {
+  .inner {
+    grid-template-columns: 1fr auto;
+  }
+
+  .desktopNav,
+  .cta {
+    display: none;
+  }
+
+  .menuBtn {
+    display: inline-flex;
+  }
+
+  .mobileNav {
+    display: block;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height var(--transition);
+  }
+
+  .mobileOpen {
+    max-height: 28rem;
+  }
+}

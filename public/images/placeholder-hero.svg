@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="900" viewBox="0 0 720 900" role="img" aria-label="Footwear image placeholder">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F7F3EB"/>
+      <stop offset="100%" stop-color="#EFE8DC"/>
+    </linearGradient>
+  </defs>
+  <rect width="720" height="900" fill="url(#bg)"/>
+  <rect x="48" y="48" width="624" height="804" fill="none" stroke="#B3935D" stroke-width="1" opacity="0.45"/>
+  <path d="M220 620c40-120 80-200 140-240 30-20 70-30 110-28 50 2 95 25 130 65 35 40 55 95 55 155v88H220v-40z" fill="#172A3A" opacity="0.12"/>
+  <ellipse cx="360" cy="520" rx="160" ry="48" fill="#702E35" opacity="0.08"/>
+  <text x="360" y="780" text-anchor="middle" fill="#716D65" font-family="Georgia, serif" font-size="13" letter-spacing="3">OVIRON · HERO PLACEHOLDER</text>
+</svg>
