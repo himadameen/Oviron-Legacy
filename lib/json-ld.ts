@@ -68,3 +68,38 @@ export function professionalServiceJsonLd() {
     ],
   };
 }
+
+export function breadcrumbJsonLd(
+  crumbs: ReadonlyArray<{ name: string; path: string }>
+) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: crumbs.map((crumb, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      name: crumb.name,
+      item: absoluteUrl(crumb.path),
+    })),
+  };
+}
+
+export function productCatalogWebPageJsonLd() {
+  return {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: "Oviron Footwear Manufacturing Catalog",
+    description:
+      "B2B leather footwear styles — formal, casual, sports, and occasion lines with specifications and quote enquiry.",
+    url: absoluteUrl("/products"),
+    isPartOf: {
+      "@type": "WebSite",
+      name: siteConfig.name,
+      url: absoluteUrl("/"),
+    },
+    about: {
+      "@type": "Thing",
+      name: "Leather footwear wholesale and private-label sourcing",
+    },
+  };
+}

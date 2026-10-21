@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import AnnouncementBar from "@/components/AnnouncementBar";
 import BuyerFeedback from "@/components/BuyerFeedback";
 import BuyerProcess from "@/components/BuyerProcess";
@@ -19,6 +20,16 @@ import PrivateLabel from "@/components/PrivateLabel";
 import ProductSpecifications from "@/components/ProductSpecifications";
 import QualityAssurance from "@/components/QualityAssurance";
 import QualityGrades from "@/components/QualityGrades";
+import { pageMetadata } from "@/lib/seo";
+import { siteConfig } from "@/lib/site-config";
+
+export const metadata: Metadata = pageMetadata({
+  title: "Oviron | Leather Footwear Sourcing & Export",
+  description: siteConfig.description,
+  path: "/",
+  ogTitle:
+    "Oviron | B2B Leather Footwear Sourcing, Wholesale & Private Label",
+});
 
 export default function HomePage() {
   return (

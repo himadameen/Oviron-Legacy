@@ -5,12 +5,9 @@ import {
   professionalServiceJsonLd,
   webSiteJsonLd,
 } from "@/lib/json-ld";
-import { siteConfig } from "@/lib/site-config";
-import { resolveSiteOrigin } from "@/lib/site-url";
 import PreventHorizontalScroll from "@/components/PreventHorizontalScroll";
+import { rootLayoutMetadata } from "@/lib/seo";
 import "./globals.css";
-
-const siteUrl = resolveSiteOrigin(siteConfig.domain);
 
 export const viewport: Viewport = {
   themeColor: "#172A3A",
@@ -20,59 +17,7 @@ export const viewport: Viewport = {
   colorScheme: "light",
 };
 
-export const metadata: Metadata = {
-  metadataBase: new URL(siteUrl),
-  title: {
-    default: "Oviron | Leather Footwear Sourcing & Export",
-    template: "%s | Oviron",
-  },
-  description: siteConfig.description,
-  applicationName: siteConfig.name,
-  keywords: [
-    "leather footwear sourcing",
-    "wholesale footwear supply",
-    "private label shoes",
-    "footwear export enquiry",
-    "B2B shoe supplier",
-    "leather shoes wholesale",
-    "footwear manufacturing coordination",
-    "international footwear buyers",
-  ],
-  authors: [{ name: siteConfig.legalName }],
-  creator: siteConfig.legalName,
-  publisher: siteConfig.legalName,
-  category: "Business",
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      "max-image-preview": "large",
-      "max-snippet": -1,
-      "max-video-preview": -1,
-    },
-  },
-  alternates: {
-    canonical: "/",
-  },
-  openGraph: {
-    type: "website",
-    locale: siteConfig.locale,
-    url: "/",
-    siteName: siteConfig.name,
-    title: "Oviron | Leather Footwear Sourcing & Export",
-    description: siteConfig.description,
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Oviron | Leather Footwear Sourcing & Export",
-    description: siteConfig.description,
-  },
-  formatDetection: {
-    telephone: false,
-  },
-};
+export const metadata: Metadata = rootLayoutMetadata();
 
 export default function RootLayout({
   children,

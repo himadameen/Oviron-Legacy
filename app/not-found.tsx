@@ -1,6 +1,14 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { primaryNav, quoteHref, siteRoutes } from "@/lib/routes";
+import { noIndexRobots } from "@/lib/seo";
 import styles from "./not-found.module.css";
+
+export const metadata: Metadata = {
+  title: "Page not found",
+  description: "The page you requested could not be found on Oviron.",
+  robots: noIndexRobots,
+};
 
 export default function NotFound() {
   return (
