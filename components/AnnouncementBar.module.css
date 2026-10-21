@@ -4,16 +4,23 @@
   font-size: 0.625rem;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  padding: 0.55rem 1rem;
+  padding-block: 0.55rem;
+  padding-inline: max(var(--page-gutter, 1.25rem), env(safe-area-inset-left, 0px))
+    max(var(--page-gutter, 1.25rem), env(safe-area-inset-right, 0px));
   text-align: center;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
 .inner {
   display: inline-flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: center;
   justify-content: center;
   gap: 0.65rem 0.85rem;
+  max-width: 100%;
 }
 
 .dot {
@@ -22,4 +29,22 @@
   border-radius: 50%;
   background: var(--gold);
   opacity: 0.85;
+}
+
+@media (max-width: 560px) {
+  .bar {
+    font-size: clamp(0.4375rem, 2.65vw, 0.5625rem);
+    letter-spacing: 0.07em;
+    padding-block: 0.5rem;
+    line-height: 1.25;
+  }
+
+  .inner {
+    flex-wrap: nowrap;
+    gap: 0.35rem 0.45rem;
+  }
+
+  .dot {
+    flex-shrink: 0;
+  }
 }

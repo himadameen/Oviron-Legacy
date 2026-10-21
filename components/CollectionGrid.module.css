@@ -6,6 +6,27 @@
   margin-bottom: 2rem;
 }
 
+@media (max-width: 960px) {
+  .filters {
+    flex-wrap: wrap;
+    justify-content: center;
+    overflow-x: visible;
+    padding-bottom: 0;
+    padding-inline: 0;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .filter,
+  .filterActive {
+    flex: 1 1 auto;
+    min-height: var(--touch-min, 2.75rem);
+    padding-inline: 1rem;
+    text-align: center;
+  }
+}
+
 .filter,
 .filterActive {
   font-family: var(--font-body);
@@ -161,12 +182,40 @@
 .footerCta {
   margin-top: 2rem;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.catalogLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--navy);
+  padding: 0.65rem 1.15rem;
+  border: 1px solid rgba(23, 42, 58, 0.2);
+  border-radius: var(--radius-pill);
+  transition: border-color var(--transition), background var(--transition);
+}
+
+.catalogLink:hover {
+  border-color: var(--gold);
+  background: rgba(179, 147, 93, 0.08);
 }
 
 @media (max-width: 960px) {
   .grid {
     grid-template-columns: repeat(2, 1fr);
+    gap: 0.85rem;
+  }
+
+  .card {
+    border-radius: 10px;
   }
 }
 

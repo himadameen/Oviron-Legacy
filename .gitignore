@@ -13,6 +13,7 @@
 
 # next.js
 /.next/
+.oviron-dev.lock
 /out/
 
 # production

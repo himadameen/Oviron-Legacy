@@ -109,6 +109,10 @@ export default function CollectionGrid() {
         )}
 
         <div className={styles.footerCta}>
+          <Link href="/products" className={styles.catalogLink}>
+            View full manufacturing catalog
+            <ArrowUpRight size={16} strokeWidth={1.5} aria-hidden />
+          </Link>
           <QuoteButton label="Request a Quote" />
         </div>
       </div>

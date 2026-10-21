@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Manrope:wght@400;500;600;700&display=swap");
+
 :root {
   --ivory: #f7f3eb;
   --champagne: #efe8dc;
@@ -8,8 +10,8 @@
   --grey: #716d65;
   --white: #ffffff;
 
-  --font-heading: var(--font-cormorant), Georgia, serif;
-  --font-body: var(--font-manrope), Arial, sans-serif;
+  --font-heading: "Cormorant Garamond", Georgia, "Times New Roman", serif;
+  --font-body: "Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
 
   --section-y: clamp(3rem, 6vw, 5.5rem);
   --container: min(72rem, calc(100% - 2.5rem));
@@ -17,6 +19,18 @@
   --radius-pill: 999px;
   --shadow-soft: 0 24px 60px rgba(23, 42, 58, 0.08);
   --transition: 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+
+  --scroll-track: rgba(23, 42, 58, 0.1);
+  --scroll-track-dark: rgba(255, 255, 255, 0.07);
+  --scroll-thumb: #b3935d;
+  --scroll-thumb-hover: #c9a96a;
+  --scroll-thumb-active: #702e35;
+  --scroll-size: 8px;
+
+  --bp-tablet: 960px;
+  --bp-mobile: 560px;
+  --touch-min: 2.75rem;
+  --page-gutter: 1.25rem;
 }
 
 *,
@@ -27,6 +41,30 @@
 
 html {
   scroll-behavior: smooth;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: var(--scroll-thumb) var(--scroll-track);
+  overflow-x: clip;
+  width: 100%;
+  max-width: 100%;
+}
+
+body {
+  overflow-x: clip;
+  width: 100%;
+  max-width: 100%;
+}
+
+body.menuOpen {
+  overflow: hidden;
+}
+
+#site-root,
+#main-content {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
+  min-width: 0;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -184,4 +222,151 @@ p:last-child {
   background: var(--gold);
   border: none;
   margin: 0;
+}
+
+/*
+ * Themed scrollbars — page (html) + .luxuryScroll on overflow panels.
+ * WebKit: hover/active thumb; Firefox: scrollbar-color.
+ */
+html::-webkit-scrollbar,
+.luxuryScroll::-webkit-scrollbar {
+  width: var(--scroll-size);
+  height: var(--scroll-size);
+}
+
+html::-webkit-scrollbar-track,
+.luxuryScroll::-webkit-scrollbar-track {
+  margin: 6px 0;
+  background: var(--scroll-track);
+  border-radius: var(--radius-pill);
+  box-shadow: inset 0 0 0 1px rgba(179, 147, 93, 0.12);
+}
+
+html::-webkit-scrollbar-thumb,
+.luxuryScroll::-webkit-scrollbar-thumb {
+  background: linear-gradient(
+    180deg,
+    var(--scroll-thumb-hover) 0%,
+    var(--scroll-thumb) 45%,
+    var(--scroll-thumb-active) 100%
+  );
+  border-radius: var(--radius-pill);
+  border: 2px solid rgba(247, 243, 235, 0.9);
+  min-height: 3rem;
+  transition: background var(--transition), border-color var(--transition),
+    box-shadow var(--transition);
+}
+
+html::-webkit-scrollbar-thumb:hover,
+.luxuryScroll::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(
+    180deg,
+    #e0c590 0%,
+    var(--scroll-thumb-hover) 40%,
+    var(--burgundy) 100%
+  );
+  border-color: rgba(179, 147, 93, 0.55);
+  box-shadow: 0 0 0 1px rgba(179, 147, 93, 0.35);
+}
+
+html::-webkit-scrollbar-thumb:active,
+.luxuryScroll::-webkit-scrollbar-thumb:active {
+  background: var(--scroll-thumb-active);
+  border-color: rgba(112, 46, 53, 0.6);
+}
+
+html::-webkit-scrollbar-corner,
+.luxuryScroll::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+html::-webkit-scrollbar-button,
+.luxuryScroll::-webkit-scrollbar-button {
+  display: none;
+  height: 0;
+  width: 0;
+}
+
+.luxuryScroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scroll-thumb) var(--scroll-track);
+}
+
+.luxuryScrollDark {
+  scrollbar-color: var(--scroll-thumb-hover) var(--scroll-track-dark);
+}
+
+.luxuryScrollDark::-webkit-scrollbar-track {
+  background: var(--scroll-track-dark);
+  box-shadow: inset 0 0 0 1px rgba(179, 147, 93, 0.2);
+}
+
+.luxuryScrollDark::-webkit-scrollbar-thumb {
+  border-color: rgba(23, 42, 58, 0.65);
+}
+
+.luxuryScrollDark::-webkit-scrollbar-thumb:hover {
+  border-color: rgba(179, 147, 93, 0.65);
+  box-shadow: 0 0 8px rgba(179, 147, 93, 0.35);
+}
+
+/* —— Tablet & mobile: touch-friendly layout —— */
+@media (max-width: 960px) {
+  html {
+    scrollbar-gutter: auto;
+  }
+
+  html.noHorizontalPageScroll,
+  body.noHorizontalPageScroll {
+    overflow-x: hidden;
+    overscroll-behavior-x: none;
+    touch-action: pan-y pinch-zoom;
+  }
+
+  :root {
+    --page-gutter: 1.125rem;
+    --container: 100%;
+    --section-y: clamp(2.25rem, 5vw, 3.75rem);
+  }
+
+  #main-content > * {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .btn {
+    min-height: var(--touch-min);
+    padding-inline: 1.25rem;
+  }
+
+  .sectionTitle {
+    font-size: clamp(1.65rem, 5.5vw, 2.35rem);
+  }
+
+  .container {
+    width: 100%;
+    max-width: 100%;
+    margin-inline: 0;
+    padding-inline: max(
+        var(--page-gutter),
+        env(safe-area-inset-left, 0px)
+      )
+      max(var(--page-gutter), env(safe-area-inset-right, 0px));
+    min-width: 0;
+  }
+
+  .section {
+    overflow-x: clip;
+    min-width: 0;
+  }
+}
+
+@media (max-width: 560px) {
+  :root {
+    --page-gutter: 1rem;
+  }
+
+  .sectionLead {
+    font-size: 0.9375rem;
+  }
 }

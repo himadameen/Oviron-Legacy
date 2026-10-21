@@ -5,9 +5,9 @@ export const imagePlaceholders = {
   editorial: "/images/placeholder-editorial.svg",
 } as const;
 
-/** Set NEXT_PUBLIC_USE_REMOTE_IMAGES=false to use local SVG placeholders only */
+/** Set NEXT_PUBLIC_USE_REMOTE_IMAGES=true to load Unsplash URLs (browser-direct via SafeImage) */
 const useRemoteImages =
-  process.env.NEXT_PUBLIC_USE_REMOTE_IMAGES !== "false";
+  process.env.NEXT_PUBLIC_USE_REMOTE_IMAGES === "true";
 
 /** Optional Unsplash references when NEXT_PUBLIC_USE_REMOTE_IMAGES=true */
 const remote = {

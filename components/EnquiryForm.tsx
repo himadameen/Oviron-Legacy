@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  Building2,
-  Globe2,
-  Layers,
-  Mail,
-  Send,
-  User,
-} from "lucide-react";
+import { Mail, Send } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import {
@@ -70,6 +63,15 @@ export default function EnquiryForm() {
     }
   }, [searchParams]);
 
+  const progress = useMemo(() => {
+    let score = 0;
+    if (form.fullName.trim()) score += 25;
+    if (form.businessEmail.trim()) score += 25;
+    if (form.destinationCountry.trim()) score += 25;
+    if (form.footwearCategory.trim()) score += 25;
+    return score;
+  }, [form]);
+
   const validate = (): boolean => {
     const next: Partial<Record<keyof FormState, string>> = {};
     if (!form.fullName.trim()) next.fullName = "Required";
@@ -111,7 +113,6 @@ export default function EnquiryForm() {
         return;
       }
       window.open(siteConfig.linkedInUrl, "_blank", "noopener,noreferrer");
-      setNotice("Opens LinkedIn — your details are not stored on this site.");
       return;
     }
 
@@ -120,7 +121,7 @@ export default function EnquiryForm() {
 
     if (channel === "whatsapp") {
       if (!isContactConfigured("whatsapp")) {
-        setNotice("Configure NEXT_PUBLIC_WHATSAPP_NUMBER or use email below.");
+        setNotice("Configure NEXT_PUBLIC_WHATSAPP_NUMBER or use email.");
         return;
       }
       const url = buildWhatsAppUrl(message);
@@ -132,14 +133,11 @@ export default function EnquiryForm() {
     }
 
     if (!isContactConfigured("email")) {
-      setNotice("Configure NEXT_PUBLIC_BUSINESS_EMAIL to draft an email.");
+      setNotice("Configure NEXT_PUBLIC_BUSINESS_EMAIL to draft email.");
       return;
     }
     const mailto = buildMailtoUrl(subject, message);
-    if (mailto) {
-      window.location.href = mailto;
-      setNotice("Opens your email app with a draft — nothing sent automatically.");
-    }
+    if (mailto) window.location.href = mailto;
   };
 
   const update =
@@ -161,12 +159,12 @@ export default function EnquiryForm() {
 
   return (
     <div id="enquiry-form" className={styles.shell}>
-      <div className={styles.shellHead}>
-        <Layers size={22} strokeWidth={1.5} aria-hidden />
+      <div className={styles.head}>
         <div>
-          <h3 className={styles.formTitle}>Quote enquiry form</h3>
-          <p className={styles.formSub}>Required fields marked *</p>
+          <h3 className={styles.title}>Quick quote brief</h3>
+          <p className={styles.sub}>Lite form — sends via WhatsApp or email</p>
         </div>
+        <span className={styles.badge}>{progress}%</span>
       </div>
 
       <form
@@ -177,86 +175,71 @@ export default function EnquiryForm() {
         }}
         noValidate
       >
-        <div className={styles.grid}>
+        <p className={styles.sectionLabel}>You</p>
+        <div className={styles.row}>
           <div className={styles.field}>
-            <label htmlFor="fullName">
-              <User size={14} aria-hidden /> Full name *
-            </label>
+            <label htmlFor="fullName">Full name *</label>
             <input
               id="fullName"
-              name="fullName"
-              autoComplete="name"
               value={form.fullName}
               onChange={update("fullName")}
-              aria-invalid={Boolean(errors.fullName)}
-              placeholder="Your name"
+              placeholder="Name"
+              className={errors.fullName ? styles.err : undefined}
             />
-            {errors.fullName && (
-              <span className={styles.error}>{errors.fullName}</span>
-            )}
+            {errors.fullName && <span className={styles.error}>{errors.fullName}</span>}
           </div>
-
           <div className={styles.field}>
-            <label htmlFor="companyName">
-              <Building2 size={14} aria-hidden /> Company
-            </label>
-            <input
-              id="companyName"
-              name="companyName"
-              autoComplete="organization"
-              value={form.companyName}
-              onChange={update("companyName")}
-              placeholder="Optional"
-            />
-          </div>
-
-          <div className={styles.field}>
-            <label htmlFor="businessEmail">
-              <Mail size={14} aria-hidden /> Business email *
-            </label>
+            <label htmlFor="businessEmail">Email *</label>
             <input
               id="businessEmail"
-              name="businessEmail"
               type="email"
-              autoComplete="email"
               value={form.businessEmail}
               onChange={update("businessEmail")}
-              aria-invalid={Boolean(errors.businessEmail)}
               placeholder="you@company.com"
+              className={errors.businessEmail ? styles.err : undefined}
             />
             {errors.businessEmail && (
               <span className={styles.error}>{errors.businessEmail}</span>
             )}
           </div>
+        </div>
 
+        <div className={styles.row}>
           <div className={styles.field}>
-            <label htmlFor="destinationCountry">
-              <Globe2 size={14} aria-hidden /> Destination *
-            </label>
+            <label htmlFor="companyName">Company</label>
+            <input
+              id="companyName"
+              value={form.companyName}
+              onChange={update("companyName")}
+              placeholder="Optional"
+            />
+          </div>
+          <div className={styles.field}>
+            <label htmlFor="destinationCountry">Destination *</label>
             <input
               id="destinationCountry"
-              name="destinationCountry"
-              autoComplete="country-name"
               value={form.destinationCountry}
               onChange={update("destinationCountry")}
-              aria-invalid={Boolean(errors.destinationCountry)}
               placeholder="Country"
+              className={errors.destinationCountry ? styles.err : undefined}
             />
             {errors.destinationCountry && (
               <span className={styles.error}>{errors.destinationCountry}</span>
             )}
           </div>
+        </div>
 
+        <p className={styles.sectionLabel}>Product</p>
+        <div className={styles.row}>
           <div className={styles.field}>
             <label htmlFor="footwearCategory">Category *</label>
             <select
               id="footwearCategory"
-              name="footwearCategory"
               value={form.footwearCategory}
               onChange={update("footwearCategory")}
-              aria-invalid={Boolean(errors.footwearCategory)}
+              className={errors.footwearCategory ? styles.err : undefined}
             >
-              <option value="">Select category</option>
+              <option value="">Select</option>
               {categoryOptions.map((name) => (
                 <option key={name} value={name}>
                   {name}
@@ -267,39 +250,36 @@ export default function EnquiryForm() {
               <span className={styles.error}>{errors.footwearCategory}</span>
             )}
           </div>
-
           <div className={styles.field}>
             <label htmlFor="preferredGrade">Grade</label>
             <select
               id="preferredGrade"
-              name="preferredGrade"
               value={form.preferredGrade}
               onChange={update("preferredGrade")}
             >
               {gradeOptions.map((g) => (
                 <option key={g || "none"} value={g}>
-                  {g || "Any / TBD"}
+                  {g || "Any"}
                 </option>
               ))}
             </select>
           </div>
+        </div>
 
+        <div className={styles.row}>
           <div className={styles.field}>
             <label htmlFor="estimatedQuantity">Quantity</label>
             <input
               id="estimatedQuantity"
-              name="estimatedQuantity"
               value={form.estimatedQuantity}
               onChange={update("estimatedQuantity")}
               placeholder="e.g. 500 pairs"
             />
           </div>
-
           <div className={styles.field}>
             <label htmlFor="privateLabel">Private label</label>
             <select
               id="privateLabel"
-              name="privateLabel"
               value={form.privateLabel}
               onChange={update("privateLabel")}
             >
@@ -308,34 +288,28 @@ export default function EnquiryForm() {
               <option value="To be discussed">To be discussed</option>
             </select>
           </div>
-
-          <div className={`${styles.field} ${styles.full}`}>
-            <label htmlFor="targetPrice">Target price</label>
-            <input
-              id="targetPrice"
-              name="targetPrice"
-              value={form.targetPrice}
-              onChange={update("targetPrice")}
-              placeholder="Optional"
-            />
-          </div>
-
-          <div className={`${styles.field} ${styles.full}`}>
-            <label htmlFor="additionalRequirements">Notes</label>
-            <textarea
-              id="additionalRequirements"
-              name="additionalRequirements"
-              rows={3}
-              value={form.additionalRequirements}
-              onChange={update("additionalRequirements")}
-              placeholder="Specs, references, timeline…"
-            />
-          </div>
         </div>
 
-        <p className={styles.privacy}>
-          Prepares a message in WhatsApp or email — not stored on this website.
-        </p>
+        <div className={styles.field}>
+          <label htmlFor="targetPrice">Target price</label>
+          <input
+            id="targetPrice"
+            value={form.targetPrice}
+            onChange={update("targetPrice")}
+            placeholder="Optional"
+          />
+        </div>
+
+        <div className={styles.field}>
+          <label htmlFor="additionalRequirements">Notes</label>
+          <textarea
+            id="additionalRequirements"
+            rows={3}
+            value={form.additionalRequirements}
+            onChange={update("additionalRequirements")}
+            placeholder="Specs, timeline, packaging…"
+          />
+        </div>
 
         {notice && (
           <p className={styles.notice} role="status">
@@ -344,26 +318,30 @@ export default function EnquiryForm() {
         )}
 
         <div className={styles.actions}>
-          <button type="submit" className={styles.primaryBtn}>
-            <Send size={18} strokeWidth={1.75} aria-hidden />
-            Get Quote via WhatsApp
+          <button type="submit" className={styles.primary}>
+            <Send size={17} aria-hidden />
+            WhatsApp quote
           </button>
           <button
             type="button"
-            className={styles.secondaryBtn}
+            className={styles.secondary}
             onClick={() => submit("email")}
           >
             <Mail size={16} aria-hidden />
-            Email quote
+            Email
           </button>
           <button
             type="button"
-            className={styles.secondaryBtn}
+            className={styles.ghost}
             onClick={() => submit("linkedin")}
           >
             LinkedIn
           </button>
         </div>
+
+        <p className={styles.privacy}>
+          Not stored on this site — opens your messaging app with a draft.
+        </p>
       </form>
     </div>
   );

@@ -2,15 +2,8 @@ import { Linkedin, Mail, MessageCircle } from "lucide-react";
 import Link from "next/link";
 import { buildWhatsAppUrl } from "@/lib/contact";
 import { isContactConfigured, siteConfig } from "@/lib/site-config";
+import { footerNav } from "@/lib/routes";
 import styles from "./Footer.module.css";
-
-const links = [
-  { href: "#collections", label: "Collections" },
-  { href: "#specifications", label: "Product Specifications" },
-  { href: "#private-label", label: "Private Label" },
-  { href: "#faq", label: "FAQ" },
-  { href: "#contact", label: "Contact" },
-];
 
 export default function Footer() {
   const year = new Date().getFullYear();
@@ -34,9 +27,9 @@ export default function Footer() {
         <nav aria-label="Footer">
           <p className={styles.navTitle}>Explore</p>
           <ul>
-            {links.map((link) => (
+            {footerNav.map((link) => (
               <li key={link.href}>
-                <a href={link.href}>{link.label}</a>
+                <Link href={link.href}>{link.label}</Link>
               </li>
             ))}
           </ul>

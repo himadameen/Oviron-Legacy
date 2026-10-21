@@ -102,6 +102,10 @@
 }
 
 @media (max-width: 860px) {
+  .section::after {
+    inset: auto 0 -40% 0;
+  }
+
   .grid {
     grid-template-columns: 1fr;
   }

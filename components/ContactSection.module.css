@@ -176,5 +176,12 @@
   .channelBtn {
     align-self: stretch;
     text-align: center;
+    min-height: var(--touch-min, 2.75rem);
+  }
+
+  .channels {
+    display: grid;
+    gap: 0.65rem;
   }
 }
+

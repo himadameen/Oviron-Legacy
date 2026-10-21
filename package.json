@@ -3,9 +3,15 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "clean": "node scripts/clean-next.mjs",
+    "dev": "node scripts/dev.mjs",
+    "dev:webpack": "npm run clean && next dev",
+    "dev:clean": "npm run dev",
+    "dev:reset": "npm run clean && node scripts/dev.mjs",
     "build": "next build",
-    "start": "next start",
+    "build:clean": "npm run clean && next build",
+    "start": "node scripts/start.mjs",
+    "preview": "npm run build:clean && next start",
     "lint": "eslint"
   },
   "dependencies": {

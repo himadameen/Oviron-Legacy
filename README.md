@@ -14,7 +14,21 @@ cp .env.example .env.local
 npm run dev
 ```
 
+`npm run dev` runs **Turbopack** and clears only tool caches (not `.next`), so it will not break a running `npm run preview`. Use **`npm run dev:reset`** if you see webpack chunk / blank-page errors.
+
 Open [http://localhost:3000](http://localhost:3000).
+
+Run **only one** local server at a time (`dev` **or** `preview`/`start`). Do not run `npm run build` while `npm run dev` is still running. For legacy webpack dev, use `npm run dev:webpack`.
+
+**Stable local preview (recommended if dev crashes):**
+
+```bash
+npm run preview
+```
+
+Then open [http://localhost:3000](http://localhost:3000) — serves the production build for `/`, `/products`, and all static routes.
+
+**Routes:** `/` (home), `/products` (catalog), `/robots.txt`, `/sitemap.xml`, plus OG/twitter image routes.
 
 Production build:
 

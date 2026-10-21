@@ -14,7 +14,13 @@ export default function Hero() {
     <section className={styles.hero} aria-labelledby="hero-heading">
       <div className={styles.glow} aria-hidden />
       <div className={`container ${styles.grid}`}>
-        <SectionReveal>
+        <SectionReveal className={styles.visualWrap}>
+          <div className={styles.showcase}>
+            <HeroVisual />
+          </div>
+        </SectionReveal>
+
+        <SectionReveal className={styles.copyBlock}>
           <p className="eyebrow">Footwear sourcing &amp; supply</p>
           <h1 id="hero-heading" className={styles.title}>
             Crafted for distinction.
@@ -35,15 +41,11 @@ export default function Hero() {
           <div className={styles.actions}>
             <QuoteButton label="Get a Quote" />
             <QuoteButton
-              href="#collections"
+              href="/#collections"
               label="View Collections"
               variant="secondary"
             />
           </div>
-        </SectionReveal>
-
-        <SectionReveal className={styles.visualWrap}>
-          <HeroVisual />
         </SectionReveal>
       </div>
     </section>

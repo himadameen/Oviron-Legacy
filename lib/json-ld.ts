@@ -1,9 +1,9 @@
 import { faqItems } from "./faq";
 import { siteConfig } from "./site-config";
+import { absoluteSiteUrl } from "./site-url";
 
 function absoluteUrl(path: string): string {
-  const base = siteConfig.domain || "https://example.com";
-  return `${base.replace(/\/$/, "")}${path.startsWith("/") ? path : `/${path}`}`;
+  return absoluteSiteUrl(path, siteConfig.domain);
 }
 
 export function organizationJsonLd() {

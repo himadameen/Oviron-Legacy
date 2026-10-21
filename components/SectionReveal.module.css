@@ -2,6 +2,8 @@
   opacity: 0;
   transform: translateY(1.25rem);
   transition: opacity 0.8s ease, transform 0.8s ease;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .visible {

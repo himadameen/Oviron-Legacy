@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from "next";
-import { Cormorant_Garamond, Manrope } from "next/font/google";
 import {
   faqPageJsonLd,
   organizationJsonLd,
@@ -7,28 +6,17 @@ import {
   webSiteJsonLd,
 } from "@/lib/json-ld";
 import { siteConfig } from "@/lib/site-config";
+import { resolveSiteOrigin } from "@/lib/site-url";
+import PreventHorizontalScroll from "@/components/PreventHorizontalScroll";
 import "./globals.css";
 
-const cormorant = Cormorant_Garamond({
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
-  variable: "--font-cormorant",
-  display: "swap",
-});
-
-const manrope = Manrope({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-manrope",
-  display: "swap",
-});
-
-const siteUrl = siteConfig.domain || "https://example.com";
+const siteUrl = resolveSiteOrigin(siteConfig.domain);
 
 export const viewport: Viewport = {
   themeColor: "#172A3A",
   width: "device-width",
   initialScale: 1,
+  viewportFit: "cover",
   colorScheme: "light",
 };
 
@@ -99,7 +87,7 @@ export default function RootLayout({
   ];
 
   return (
-    <html lang="en" className={`${cormorant.variable} ${manrope.variable}`}>
+    <html lang="en">
       <body>
         {structuredData.map((data, index) => (
           <script
@@ -108,7 +96,10 @@ export default function RootLayout({
             dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
           />
         ))}
-        {children}
+        <div id="site-root">
+          <PreventHorizontalScroll />
+          {children}
+        </div>
       </body>
     </html>
   );

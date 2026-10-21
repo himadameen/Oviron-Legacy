@@ -10,18 +10,25 @@ export default function ScrollOnLoad() {
   useLayoutEffect(() => {
     if (typeof window === "undefined") return;
 
+    sessionStorage.removeItem("oviron_chunk_retry");
+
     window.history.scrollRestoration = "manual";
 
     const nav = performance.getEntriesByType(
       "navigation"
     )[0] as PerformanceNavigationTiming | undefined;
 
-    if (nav?.type === "reload") {
+    const isReload = nav?.type === "reload";
+    const isNavigate = nav?.type === "navigate";
+
+    if (isReload || isNavigate) {
       const { pathname, search } = window.location;
-      if (window.location.hash) {
+      if (isReload && window.location.hash) {
         window.history.replaceState(null, "", `${pathname}${search}`);
       }
-      window.scrollTo(0, 0);
+      if (isReload || (isNavigate && !window.location.hash)) {
+        window.scrollTo(0, 0);
+      }
     }
   }, []);
 

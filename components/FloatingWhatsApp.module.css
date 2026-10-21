@@ -1,8 +1,9 @@
 .fab {
   position: fixed;
-  right: 1.25rem;
-  bottom: 1.25rem;
+  right: max(var(--page-gutter, 1.25rem), env(safe-area-inset-right, 0px));
+  bottom: max(var(--page-gutter, 1.25rem), env(safe-area-inset-bottom, 0px));
   z-index: 90;
+  max-width: calc(100% - 2 * var(--page-gutter, 1.25rem));
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
@@ -31,6 +32,7 @@
   border: 2px solid rgba(37, 211, 102, 0.5);
   animation: ping 2s ease-out infinite;
   pointer-events: none;
+  clip-path: inset(0 round var(--radius-pill));
 }
 
 .label {
@@ -51,6 +53,16 @@
   100% {
     transform: scale(1.25);
     opacity: 0;
+  }
+}
+
+@media (max-width: 560px) {
+  .fab {
+    padding: 0.85rem;
+  }
+
+  .label {
+    display: none;
   }
 }
 

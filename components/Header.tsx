@@ -1,21 +1,20 @@
 "use client";
 
-import { Menu, X } from "lucide-react";
+import { ArrowUpRight, Menu, X } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
+import { siteRoutes, primaryNav, quoteHref } from "@/lib/routes";
 import styles from "./Header.module.css";
-
-const navLinks = [
-  { href: "#assurance", label: "Quality" },
-  { href: "#collections", label: "Collections" },
-  { href: "#gallery", label: "Gallery" },
-  { href: "#feedback", label: "Reviews" },
-  { href: "#faq", label: "FAQ" },
-];
 
 export default function Header() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
@@ -25,37 +24,99 @@ export default function Header() {
   }, []);
 
   useEffect(() => {
+    document.body.classList.toggle("menuOpen", open);
     document.body.style.overflow = open ? "hidden" : "";
     return () => {
+      document.body.classList.remove("menuOpen");
       document.body.style.overflow = "";
     };
   }, [open]);
 
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open]);
+
   const closeMenu = () => setOpen(false);
+
+  const mobileOverlay =
+    open && mounted
+      ? createPortal(
+          <>
+            <button
+              type="button"
+              className={styles.backdrop}
+              aria-label="Close menu"
+              onClick={closeMenu}
+            />
+            <nav
+              id="mobile-nav"
+              className={styles.mobilePanel}
+              aria-label="Mobile primary"
+            >
+              <p className={styles.mobileEyebrow}>Buyer menu</p>
+              <ul className={styles.mobileLinks}>
+                {primaryNav.map((link) => (
+                  <li key={link.href}>
+                    <Link href={link.href} onClick={closeMenu}>
+                      {link.label}
+                      <ArrowUpRight size={18} strokeWidth={1.5} aria-hidden />
+                    </Link>
+                  </li>
+                ))}
+                <li>
+                  <Link
+                    href={siteRoutes.products}
+                    className={styles.mobileHighlight}
+                    onClick={closeMenu}
+                  >
+                    Full manufacturing catalog
+                    <ArrowUpRight size={18} strokeWidth={1.5} aria-hidden />
+                  </Link>
+                </li>
+              </ul>
+              <Link
+                href={quoteHref}
+                className={styles.mobileCta}
+                onClick={closeMenu}
+              >
+                Get a Quote
+              </Link>
+            </nav>
+          </>,
+          document.body
+        )
+      : null;
 
   return (
     <header
       className={`${styles.header} ${scrolled ? styles.scrolled : ""}`}
     >
-      <div className={styles.inner}>
+      <div className={`container ${styles.inner}`}>
         <Link href="/" className={styles.brand} onClick={closeMenu}>
           <span className={styles.wordmark}>Oviron</span>
-          <span className={styles.descriptor}>Footwear Sourcing &amp; Export</span>
+          <span className={styles.descriptor}>
+            Footwear Sourcing &amp; Export
+          </span>
         </Link>
 
         <nav className={styles.desktopNav} aria-label="Primary">
           <ul>
-            {navLinks.map((link) => (
+            {primaryNav.map((link) => (
               <li key={link.href}>
-                <a href={link.href}>{link.label}</a>
+                <Link href={link.href}>{link.label}</Link>
               </li>
             ))}
           </ul>
         </nav>
 
-        <a href="#contact" className={`btn btnPrimary ${styles.cta}`}>
+        <Link href={quoteHref} className={`btn btnPrimary ${styles.cta}`}>
           Get a Quote
-        </a>
+        </Link>
 
         <button
           type="button"
@@ -65,31 +126,14 @@ export default function Header() {
           aria-label={open ? "Close menu" : "Open menu"}
           onClick={() => setOpen((v) => !v)}
         >
-          {open ? <X size={22} strokeWidth={1.5} /> : <Menu size={22} strokeWidth={1.5} />}
+          {open ? (
+            <X size={22} strokeWidth={1.5} />
+          ) : (
+            <Menu size={22} strokeWidth={1.5} />
+          )}
         </button>
       </div>
-
-      <nav
-        id="mobile-nav"
-        className={`${styles.mobileNav} ${open ? styles.mobileOpen : ""}`}
-        aria-label="Mobile primary"
-        aria-hidden={!open}
-      >
-        <ul>
-          {navLinks.map((link) => (
-            <li key={link.href}>
-              <a href={link.href} onClick={closeMenu}>
-                {link.label}
-              </a>
-            </li>
-          ))}
-          <li>
-            <a href="#contact" className={styles.mobileCta} onClick={closeMenu}>
-              Get a Quote
-            </a>
-          </li>
-        </ul>
-      </nav>
+      {mobileOverlay}
     </header>
   );
 }
