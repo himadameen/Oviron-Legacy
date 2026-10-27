@@ -13,25 +13,8 @@
 }
 
 .brand {
-  text-decoration: none;
   display: inline-flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.wordmark {
-  font-family: var(--font-heading);
-  font-size: 1.5rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--ivory);
-}
-
-.tag {
-  font-size: 0.5625rem;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: rgba(247, 243, 235, 0.55);
+  align-items: flex-start;
 }
 
 .blurb {

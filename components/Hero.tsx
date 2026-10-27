@@ -41,8 +41,8 @@ export default function Hero() {
           <div className={styles.actions}>
             <QuoteButton label="Get a Quote" />
             <QuoteButton
-              href="/#collections"
-              label="View Collections"
+              href="/catalogue"
+              label="View Catalogue"
               variant="secondary"
             />
           </div>

@@ -9,7 +9,11 @@ import {
   formatEnquiryMessage,
   type EnquiryPayload,
 } from "@/lib/contact";
-import { collections } from "@/lib/collections";
+import {
+  formatEnquiryCategoryValue,
+  getCatalog,
+} from "@/lib/catalog";
+import { getProductBySeoSlug } from "@/lib/product-routes";
 import { isContactConfigured, siteConfig } from "@/lib/site-config";
 import styles from "./EnquiryForm.module.css";
 
@@ -51,15 +55,17 @@ export default function EnquiryForm() {
   );
   const [notice, setNotice] = useState<string | null>(null);
 
-  const categoryOptions = useMemo(
-    () => collections.map((c) => c.name),
-    []
-  );
+  const catalog = useMemo(() => getCatalog(), []);
 
   useEffect(() => {
+    const styleSlug = searchParams.get("style");
+    const fromStyle = styleSlug ? getProductBySeoSlug(styleSlug) : null;
     const fromUrl = searchParams.get("category");
-    if (fromUrl) {
-      setForm((prev) => ({ ...prev, footwearCategory: fromUrl }));
+    const category = fromStyle
+      ? formatEnquiryCategoryValue(fromStyle)
+      : fromUrl;
+    if (category) {
+      setForm((prev) => ({ ...prev, footwearCategory: category }));
     }
   }, [searchParams]);
 
@@ -232,7 +238,7 @@ export default function EnquiryForm() {
         <p className={styles.sectionLabel}>Product</p>
         <div className={styles.row}>
           <div className={styles.field}>
-            <label htmlFor="footwearCategory">Category *</label>
+            <label htmlFor="footwearCategory">Product category *</label>
             <select
               id="footwearCategory"
               value={form.footwearCategory}
@@ -240,10 +246,23 @@ export default function EnquiryForm() {
               className={errors.footwearCategory ? styles.err : undefined}
             >
               <option value="">Select</option>
-              {categoryOptions.map((name) => (
-                <option key={name} value={name}>
-                  {name}
-                </option>
+              {catalog.mainCategories.map((main) => (
+                <optgroup key={main.id} label={main.label}>
+                  {main.subcategories.flatMap((sub) =>
+                    sub.products.map((product) => {
+                      const value = formatEnquiryCategoryValue({
+                        mainCategoryLabel: main.label,
+                        subCategoryLabel: sub.label,
+                        name: product.name,
+                      });
+                      return (
+                        <option key={product.id} value={value}>
+                          {sub.label} — {product.name}
+                        </option>
+                      );
+                    })
+                  )}
+                </optgroup>
               ))}
             </select>
             {errors.footwearCategory && (

@@ -247,14 +247,19 @@
   width: 2.75rem;
   height: 2.75rem;
   border-radius: 50%;
+  overflow: hidden;
   background: var(--burgundy);
-  color: var(--ivory);
   display: grid;
   place-items: center;
-  font-family: var(--font-heading);
-  font-size: 1.15rem;
   box-shadow: 0 12px 30px rgba(112, 46, 53, 0.35);
   animation: stampPulse 4s ease-in-out infinite;
+}
+
+.stampLogo {
+  width: 78%;
+  height: 78%;
+  object-fit: contain;
+  mix-blend-mode: lighten;
 }
 
 .goldLine {

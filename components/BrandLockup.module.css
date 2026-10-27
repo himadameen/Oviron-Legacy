@@ -1,0 +1,59 @@
+.lockup {
+  text-decoration: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.wordmark {
+  font-family: var(--font-heading);
+  font-size: 1.65rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--navy);
+  line-height: 1;
+}
+
+.tagline {
+  font-size: 0.5625rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--grey);
+}
+
+.footer {
+  gap: 0.25rem;
+}
+
+.footer .wordmark {
+  font-size: 1.5rem;
+  color: var(--ivory);
+}
+
+.footer .tagline {
+  color: rgba(247, 243, 235, 0.55);
+}
+
+@media (max-width: 960px) {
+  .header .wordmark {
+    font-size: 1.35rem;
+    letter-spacing: 0.11em;
+  }
+
+  .header .tagline {
+    display: block;
+    font-size: 0.5rem;
+    letter-spacing: 0.14em;
+    line-height: 1.35;
+    white-space: normal;
+  }
+}
+
+@media (max-width: 560px) {
+  .header .tagline {
+    font-size: 0.46875rem;
+    letter-spacing: 0.11em;
+    max-width: 11.5rem;
+  }
+}

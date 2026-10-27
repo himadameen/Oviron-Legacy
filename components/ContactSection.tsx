@@ -1,62 +1,88 @@
-import { Clock, Linkedin, Mail, MessageCircle, ShieldCheck } from "lucide-react";
-import { Suspense, type ReactNode } from "react";
-import { isContactConfigured, siteConfig } from "@/lib/site-config";
-import { buildWhatsAppUrl } from "@/lib/contact";
+import { ArrowUpRight, Clock, ShieldCheck } from "lucide-react";
+import { Suspense } from "react";
+import {
+  contactChannels,
+  enquiryFormAnchor,
+  type ContactChannelId,
+} from "@/lib/contact-channels";
 import EnquiryForm from "./EnquiryForm";
 import SectionReveal from "./SectionReveal";
 import styles from "./ContactSection.module.css";
 
+const channelStyle: Record<ContactChannelId, string> = {
+  whatsapp: styles.channelWhatsapp,
+  email: styles.channelEmail,
+  linkedin: styles.channelLinkedin,
+};
+
 function ChannelCard({
+  id,
   title,
-  desc,
-  icon,
-  href,
-  actionLabel,
-  fallbackHref,
+  description,
+  icon: Icon,
+  primaryHref,
+  ready,
+  primaryLabel,
+  pendingLabel,
 }: {
+  id: ContactChannelId;
   title: string;
-  desc: string;
-  icon: ReactNode;
-  href: string | null;
-  actionLabel: string;
-  fallbackHref: string;
+  description: string;
+  icon: (typeof contactChannels)[number]["icon"];
+  primaryHref: string | null;
+  ready: boolean;
+  primaryLabel: string;
+  pendingLabel: string;
 }) {
-  const link = href ?? fallbackHref;
-  const external = link.startsWith("http");
+  const external = Boolean(primaryHref?.startsWith("http"));
 
   return (
-    <article className={styles.channel}>
-      <div className={styles.channelTop}>
-        <div className={styles.iconCircle}>{icon}</div>
-        <div>
+    <article className={`${styles.channel} ${channelStyle[id]}`}>
+      <div className={styles.channelMain}>
+        <div className={styles.iconCircle} aria-hidden>
+          <Icon size={20} strokeWidth={1.5} />
+        </div>
+        <div className={styles.channelCopy}>
           <h3>{title}</h3>
-          <p>{desc}</p>
+          <p>{description}</p>
         </div>
       </div>
-      <a
-        href={link}
-        className={styles.channelBtn}
-        {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-      >
-        {href ? actionLabel : "Use quote form"}
-      </a>
+
+      <div className={styles.channelActions}>
+        {ready && primaryHref ? (
+          <>
+            <a
+              href={primaryHref}
+              className={styles.btnPrimary}
+              {...(external
+                ? { target: "_blank", rel: "noopener noreferrer" }
+                : {})}
+            >
+              {primaryLabel}
+              {external ? (
+                <ArrowUpRight size={14} strokeWidth={2} aria-hidden />
+              ) : null}
+            </a>
+            <a href={enquiryFormAnchor} className={styles.btnSecondary}>
+              Use quote form
+            </a>
+          </>
+        ) : (
+          <>
+            <a href={enquiryFormAnchor} className={styles.btnPrimary}>
+              {pendingLabel}
+            </a>
+            <p className={styles.pendingNote}>
+              Direct {title} link coming soon — use the quote form for now.
+            </p>
+          </>
+        )}
+      </div>
     </article>
   );
 }
 
 export default function ContactSection() {
-  const whatsappReady = isContactConfigured("whatsapp");
-  const emailReady = isContactConfigured("email");
-  const linkedInReady = isContactConfigured("linkedin");
-
-  const whatsappHref = whatsappReady
-    ? buildWhatsAppUrl(
-        "Hello Oviron — I would like a quote for leather footwear sourcing."
-      )
-    : null;
-
-  const formAnchor = "#enquiry-form";
-
   return (
     <section
       id="contact"
@@ -86,34 +112,19 @@ export default function ContactSection() {
           </ul>
 
           <div className={styles.channels}>
-            <ChannelCard
-              title="WhatsApp"
-              desc="Fast quote discussions"
-              icon={<MessageCircle size={20} strokeWidth={1.5} />}
-              href={whatsappHref}
-              actionLabel="Open WhatsApp"
-              fallbackHref={formAnchor}
-            />
-            <ChannelCard
-              title="Email"
-              desc="Formal enquiry draft"
-              icon={<Mail size={20} strokeWidth={1.5} />}
-              href={
-                emailReady
-                  ? `mailto:${siteConfig.businessEmail}?subject=${encodeURIComponent("OVIRON — Quote Request")}`
-                  : null
-              }
-              actionLabel="Send email"
-              fallbackHref={formAnchor}
-            />
-            <ChannelCard
-              title="LinkedIn"
-              desc="Professional connect"
-              icon={<Linkedin size={20} strokeWidth={1.5} />}
-              href={linkedInReady ? siteConfig.linkedInUrl : null}
-              actionLabel="View profile"
-              fallbackHref={formAnchor}
-            />
+            {contactChannels.map((channel) => (
+              <ChannelCard
+                key={channel.id}
+                id={channel.id}
+                title={channel.title}
+                description={channel.description}
+                icon={channel.icon}
+                ready={channel.isReady()}
+                primaryHref={channel.getPrimaryHref()}
+                primaryLabel={channel.primaryLabel}
+                pendingLabel={channel.pendingLabel}
+              />
+            ))}
           </div>
         </SectionReveal>
 

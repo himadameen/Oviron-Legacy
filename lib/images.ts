@@ -1,3 +1,11 @@
+/** Brand marks — bundled in /public/images */
+export const brandLogo = {
+  /** Wordmark + tagline (navbar, footer) */
+  full: "/images/logo-full.png",
+  /** Circular emblem (favicon, hero stamp) */
+  icon: "/images/logo.png",
+} as const;
+
 /** Bundled placeholders — always available offline. */
 export const imagePlaceholders = {
   hero: "/images/placeholder-hero.svg",

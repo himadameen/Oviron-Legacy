@@ -11,6 +11,8 @@ import FloatingWhatsApp from "@/components/FloatingWhatsApp";
 import Footer from "@/components/Footer";
 import Gallery from "@/components/Gallery";
 import Header from "@/components/Header";
+import ScrollToTop from "@/components/ScrollToTop";
+import SiteChrome from "@/components/SiteChrome";
 import Hero from "@/components/Hero";
 import IntroSplash from "@/components/IntroSplash";
 import ScrollOnLoad from "@/components/ScrollOnLoad";
@@ -20,6 +22,7 @@ import PrivateLabel from "@/components/PrivateLabel";
 import ProductSpecifications from "@/components/ProductSpecifications";
 import QualityAssurance from "@/components/QualityAssurance";
 import QualityGrades from "@/components/QualityGrades";
+import { loadCatalog } from "@/lib/catalog";
 import { pageMetadata } from "@/lib/seo";
 import { siteConfig } from "@/lib/site-config";
 
@@ -31,13 +34,17 @@ export const metadata: Metadata = pageMetadata({
     "Oviron | B2B Leather Footwear Sourcing, Wholesale & Private Label",
 });
 
-export default function HomePage() {
+export default async function HomePage() {
+  await loadCatalog();
+
   return (
     <>
       <ScrollOnLoad />
       <IntroSplash />
-      <AnnouncementBar />
-      <Header />
+      <SiteChrome>
+        <AnnouncementBar />
+        <Header />
+      </SiteChrome>
       <main id="main-content">
         <Hero />
         <QualityAssurance />
@@ -56,6 +63,7 @@ export default function HomePage() {
         <FinalCTA />
       </main>
       <Footer />
+      <ScrollToTop />
       <FloatingWhatsApp />
     </>
   );

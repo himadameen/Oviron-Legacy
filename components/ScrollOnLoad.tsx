@@ -26,7 +26,15 @@ export default function ScrollOnLoad() {
       if (isReload && window.location.hash) {
         window.history.replaceState(null, "", `${pathname}${search}`);
       }
-      if (isReload || (isNavigate && !window.location.hash)) {
+      const query = new URLSearchParams(window.location.search);
+      const hasDeepLink =
+        Boolean(window.location.hash) ||
+        query.has("category") ||
+        query.has("style") ||
+        query.has("product") ||
+        window.location.pathname.startsWith("/products/");
+
+      if (isReload || (isNavigate && !hasDeepLink)) {
         window.scrollTo(0, 0);
       }
     }

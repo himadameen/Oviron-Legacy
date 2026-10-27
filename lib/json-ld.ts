@@ -1,4 +1,7 @@
 import { faqItems } from "./faq";
+import type { ManufacturingProduct } from "./product-catalog";
+import { categoryLineFor } from "./product-catalog";
+import { getProductPath, primaryColorKeywords } from "./product-slugs";
 import { siteConfig } from "./site-config";
 import { absoluteSiteUrl } from "./site-url";
 
@@ -81,6 +84,39 @@ export function breadcrumbJsonLd(
       name: crumb.name,
       item: absoluteUrl(crumb.path),
     })),
+  };
+}
+
+export function productJsonLd(product: ManufacturingProduct) {
+  const colors = primaryColorKeywords(product.colorRuns);
+  const path = getProductPath(product);
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.name,
+    description: `${product.description}. ${product.typicalUse}. Colors: ${product.colorRuns}. SKU ${product.skuRef}.`,
+    sku: product.skuRef,
+    category: categoryLineFor(product),
+    url: absoluteUrl(path),
+    image: product.galleryImages[0] ? absoluteUrl(product.galleryImages[0]) : undefined,
+    material: product.upperMaterial,
+    color: colors.length > 0 ? colors : undefined,
+    audience: {
+      "@type": "BusinessAudience",
+      audienceType: "B2B footwear buyers",
+    },
+    offers: {
+      "@type": "Offer",
+      availability: "https://schema.org/PreOrder",
+      priceCurrency: "USD",
+      url: absoluteUrl(path),
+      description: "Wholesale / private-label — quote on enquiry",
+    },
+    brand: {
+      "@type": "Brand",
+      name: siteConfig.name,
+    },
   };
 }
 

@@ -1,0 +1,75 @@
+.frame {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  max-width: 100%;
+  line-height: 0;
+  border-radius: 10px;
+  box-shadow: 0 6px 20px rgba(23, 42, 58, 0.12);
+}
+
+.frameLight {
+  background: #0c0c0c;
+  padding: 0.4rem 0.7rem;
+  border: 1px solid rgba(179, 147, 93, 0.35);
+}
+
+.frameDark {
+  background: #0c0c0c;
+  padding: 0.45rem 0.75rem;
+  border: 1px solid rgba(179, 147, 93, 0.45);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
+}
+
+.logo {
+  display: block;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  object-position: left center;
+}
+
+.header {
+  composes: logo;
+  max-width: min(16rem, 100%);
+  max-height: 2.65rem;
+}
+
+.footer {
+  composes: logo;
+  max-width: min(18rem, 100%);
+  max-height: 3rem;
+}
+
+.mobile {
+  composes: logo;
+  max-width: min(13rem, 100%);
+  max-height: 2.35rem;
+}
+
+@media (max-width: 960px) {
+  .frameLight {
+    padding: 0.35rem 0.55rem;
+  }
+
+  .header {
+    max-height: 2.35rem;
+    max-width: min(12.5rem, calc(100vw - 5.5rem));
+  }
+}
+
+@media (max-width: 560px) {
+  .frameLight {
+    padding: 0.3rem 0.5rem;
+  }
+
+  .header {
+    max-height: 2.05rem;
+    max-width: min(10.5rem, calc(100vw - 4.75rem));
+  }
+
+  .mobile {
+    max-height: 2.05rem;
+    max-width: min(11rem, 100%);
+  }
+}

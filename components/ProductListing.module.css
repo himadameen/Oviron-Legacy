@@ -88,11 +88,18 @@
   color: rgba(247, 243, 235, 0.78);
 }
 
+.heroActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.65rem;
+  margin-top: 1.35rem;
+}
+
 .heroCta {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  margin-top: 1.35rem;
   padding: 0.75rem 1.25rem;
   font-size: 0.6875rem;
   font-weight: 700;
@@ -107,6 +114,32 @@
 
 .heroCta:hover {
   background: var(--ivory);
+  transform: translateY(-1px);
+}
+
+.heroCtaSecondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.75rem 1.25rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--ivory);
+  background: transparent;
+  border: 1px solid rgba(247, 243, 235, 0.35);
+  border-radius: var(--radius-pill);
+  transition:
+    border-color var(--transition),
+    background var(--transition),
+    transform var(--transition);
+}
+
+.heroCtaSecondary:hover {
+  border-color: var(--gold);
+  background: rgba(255, 255, 255, 0.08);
   transform: translateY(-1px);
 }
 
@@ -283,8 +316,16 @@
   border: 1px solid rgba(179, 147, 93, 0.22);
   overflow: hidden;
   box-shadow: var(--shadow-soft);
+  scroll-margin-top: calc(var(--site-chrome-height, 5.5rem) + 1rem);
   transition: border-color var(--transition), box-shadow var(--transition),
     transform var(--transition);
+}
+
+.cardHighlighted {
+  border-color: var(--gold);
+  box-shadow:
+    0 0 0 2px rgba(179, 147, 93, 0.35),
+    var(--shadow-soft);
 }
 
 .card:hover {
@@ -628,9 +669,109 @@
   color: var(--charcoal);
 }
 
+.cardTitleLink {
+  color: inherit;
+  text-decoration: none;
+  transition: color var(--transition);
+}
+
+.cardTitleLink:hover {
+  color: var(--burgundy);
+}
+
 .cardFoot {
   margin-top: auto;
   padding-top: 0.35rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.stylePageLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.55rem 0.95rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--navy);
+  background: rgba(179, 147, 93, 0.14);
+  border: 1px solid rgba(179, 147, 93, 0.35);
+  border-radius: var(--radius-pill);
+  transition:
+    background var(--transition),
+    border-color var(--transition),
+    color var(--transition);
+}
+
+.stylePageLink:hover {
+  background: rgba(179, 147, 93, 0.22);
+  border-color: var(--gold);
+  color: var(--burgundy);
+}
+
+.detailHero {
+  padding: clamp(1.25rem, 3vw, 2rem) 0 0.5rem;
+}
+
+.detailMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0 0 1rem;
+  padding: 0;
+  list-style: none;
+  font-size: 0.8125rem;
+  color: var(--grey);
+}
+
+.detailMeta li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.detailMeta strong {
+  color: var(--navy);
+  font-weight: 600;
+}
+
+.detailCatalogueActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin: 0 0 1.25rem;
+}
+
+.detailCatalogueLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--navy);
+  padding: 0.65rem 1rem;
+  border: 1px solid rgba(26, 35, 50, 0.15);
+  border-radius: var(--radius-pill);
+  transition:
+    border-color var(--transition),
+    background var(--transition);
+}
+
+.detailCatalogueLink:hover {
+  border-color: var(--gold);
+  background: rgba(179, 147, 93, 0.12);
+}
+
+.detailWrap {
+  padding-bottom: clamp(2.5rem, 5vw, 4rem);
 }
 
 /* —— Bottom CTA —— */
@@ -687,6 +828,38 @@
   font-size: 0.875rem;
   line-height: 1.6;
   color: rgba(247, 243, 235, 0.78);
+}
+
+.bottomActions {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
+
+.catalogueLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--ivory);
+  padding: 0.65rem 1rem;
+  border: 1px solid rgba(247, 243, 235, 0.35);
+  border-radius: var(--radius-pill);
+  transition:
+    border-color var(--transition),
+    background var(--transition);
+}
+
+.catalogueLink:hover {
+  border-color: var(--gold);
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .bottomCta :global(a) {

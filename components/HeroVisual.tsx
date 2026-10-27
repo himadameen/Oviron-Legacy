@@ -1,7 +1,8 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
-import { imagePlaceholders } from "@/lib/images";
+import { brandLogo, imagePlaceholders } from "@/lib/images";
 import SafeImage from "./SafeImage";
 import styles from "./HeroVisual.module.css";
 
@@ -122,7 +123,14 @@ export default function HeroVisual() {
           </div>
         </div>
         <div className={styles.stamp} aria-hidden>
-          <span>O</span>
+          <Image
+            src={brandLogo.icon}
+            alt=""
+            width={44}
+            height={44}
+            className={styles.stampLogo}
+            priority
+          />
         </div>
         <span className={styles.goldLine} aria-hidden />
       </div>

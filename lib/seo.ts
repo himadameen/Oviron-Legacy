@@ -135,8 +135,9 @@ export function rootLayoutMetadata(): Metadata {
       description: siteConfig.description,
     },
     icons: {
-      icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],
-      shortcut: ["/favicon.svg"],
+      icon: [{ url: "/favicon.png", type: "image/png", sizes: "268x268" }],
+      shortcut: ["/favicon.png"],
+      apple: [{ url: "/favicon.png", type: "image/png", sizes: "268x268" }],
     },
     manifest: "/manifest.webmanifest",
     referrer: "origin-when-cross-origin",
@@ -160,5 +161,10 @@ export const sitemapEntries = [
     path: "/products" as const,
     changeFrequency: "weekly" as const,
     priority: 0.9,
+  },
+  {
+    path: "/catalogue" as const,
+    changeFrequency: "weekly" as const,
+    priority: 0.85,
   },
 ] as const;

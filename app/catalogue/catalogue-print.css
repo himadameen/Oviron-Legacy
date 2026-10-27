@@ -1,0 +1,19 @@
+@page {
+  size: A4;
+  margin: 14mm 12mm 16mm;
+}
+
+@media print {
+  html,
+  body {
+    background: #ffffff !important;
+  }
+
+  #site-root {
+    background: #ffffff !important;
+  }
+
+  a[href^="http"]::after {
+    content: none;
+  }
+}

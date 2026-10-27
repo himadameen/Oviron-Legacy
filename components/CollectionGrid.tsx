@@ -3,43 +3,48 @@
 import { ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import SafeImage from "./SafeImage";
-import { buildWhatsAppUrl, categoryWhatsAppMessage } from "@/lib/contact";
-import {
-  collectionGroups,
-  collections,
-  type CollectionGroupId,
-} from "@/lib/collections";
-import { isContactConfigured } from "@/lib/site-config";
+import { CATALOGUE_DOWNLOAD_PATH, CATALOGUE_PATH } from "@/lib/catalogue-routes";
+import { getCatalog, type CatalogProduct } from "@/lib/catalog";
+import { productCatalogHref } from "@/lib/product-routes";
 import QuoteButton from "./QuoteButton";
+import SafeImage from "./SafeImage";
 import SectionIntro from "./SectionIntro";
 import SectionReveal from "./SectionReveal";
 import styles from "./CollectionGrid.module.css";
 
-function handleCategoryClick(
-  e: React.MouseEvent,
-  categoryName: string
-) {
-  if (isContactConfigured("whatsapp")) {
-    e.preventDefault();
-    const url = buildWhatsAppUrl(categoryWhatsAppMessage(categoryName));
-    if (url) window.open(url, "_blank", "noopener,noreferrer");
-    return;
-  }
-  requestAnimationFrame(() => {
-    document
-      .getElementById("enquiry-form")
-      ?.scrollIntoView({ behavior: "smooth", block: "start" });
-  });
+function defaultMainCategoryId(
+  mains: ReturnType<typeof getCatalog>["mainCategories"]
+): string {
+  return mains.find((m) => m.id === "shoes")?.id ?? mains[0]?.id ?? "";
 }
 
 export default function CollectionGrid() {
-  const [active, setActive] = useState<CollectionGroupId | "all">("all");
+  const catalog = getCatalog();
+  const [activeMain, setActiveMain] = useState(() =>
+    defaultMainCategoryId(catalog.mainCategories)
+  );
 
-  const filtered = useMemo(() => {
-    if (active === "all") return collections;
-    return collections.filter((c) => c.group === active);
-  }, [active]);
+  const activeCategory = useMemo(
+    () => catalog.mainCategories.find((m) => m.id === activeMain),
+    [catalog.mainCategories, activeMain]
+  );
+
+  const blocks = useMemo(() => {
+    if (!activeCategory) return [];
+    return activeCategory.subcategories.map((sub) => ({
+      subLabel: sub.label,
+      subDescription: sub.description,
+      products: sub.products,
+    }));
+  }, [activeCategory]);
+
+  if (catalog.productCount === 0 || catalog.mainCategories.length === 0) {
+    return null;
+  }
+
+  const styleCount =
+    activeCategory?.productCount ??
+    blocks.reduce((n, b) => n + b.products.length, 0);
 
   return (
     <section
@@ -51,66 +56,78 @@ export default function CollectionGrid() {
         <SectionReveal>
           <SectionIntro
             eyebrow="Collections"
-            title="Nine styles. Three rows."
-            lead="Browse by Formal, Casual, Sports, and Other — tap for a quote."
+            title={
+              activeCategory
+                ? `${activeCategory.label} sourcing`
+                : "Product collections"
+            }
+            lead={
+              activeCategory?.subtitle ??
+              "Browse by line — open a style for full specifications."
+            }
             align="center"
             titleId="collections-heading"
           />
         </SectionReveal>
 
-        <div className={styles.filters} role="tablist" aria-label="Collection groups">
-          <button
-            type="button"
-            role="tab"
-            aria-selected={active === "all"}
-            className={active === "all" ? styles.filterActive : styles.filter}
-            onClick={() => setActive("all")}
+        <div className={styles.categoryShell}>
+          <div
+            className={styles.filters}
+            role="tablist"
+            aria-label="Product categories"
           >
-            All
-          </button>
-          {collectionGroups.map((group) => (
-            <button
-              key={group.id}
-              type="button"
-              role="tab"
-              aria-selected={active === group.id}
-              className={active === group.id ? styles.filterActive : styles.filter}
-              onClick={() => setActive(group.id)}
-            >
-              {group.label}
-            </button>
-          ))}
+            {catalog.mainCategories.map((main) => (
+              <button
+                key={main.id}
+                type="button"
+                role="tab"
+                aria-selected={activeMain === main.id}
+                className={
+                  activeMain === main.id ? styles.filterActive : styles.filter
+                }
+                onClick={() => setActiveMain(main.id)}
+              >
+                {main.label}
+              </button>
+            ))}
+          </div>
+          {activeCategory ? (
+            <p className={styles.categoryMeta}>
+              {styleCount} style{styleCount === 1 ? "" : "s"} in{" "}
+              {activeCategory.label}
+            </p>
+          ) : null}
         </div>
 
-        {active === "all" ? (
-          collectionGroups.map((group) => {
-            const items = collections.filter((c) => c.group === group.id);
-            if (items.length === 0) return null;
-            return (
-              <div key={group.id} className={styles.groupBlock}>
-                <header className={styles.groupHead}>
-                  <h3>{group.label}</h3>
-                  <p>{group.subtitle}</p>
-                </header>
-                <ul className={styles.grid}>
-                  {items.map((item, index) => (
-                    <li key={item.id}>{renderCard(item, index)}</li>
-                  ))}
-                </ul>
-              </div>
-            );
-          })
-        ) : (
-          <ul className={styles.grid}>
-            {filtered.map((item, index) => (
-              <li key={item.id}>{renderCard(item, index)}</li>
-            ))}
-          </ul>
-        )}
+        <div className={styles.blocks}>
+          {blocks.map((block) => (
+            <div key={block.subLabel} className={styles.groupBlock}>
+              <header className={styles.groupHead}>
+                <h3>{block.subLabel}</h3>
+                {block.subDescription ? (
+                  <p>{block.subDescription}</p>
+                ) : null}
+              </header>
+              <ul className={styles.grid}>
+                {block.products.map((item, index) => (
+                  <li key={item.id}>{renderCard(item, index)}</li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
 
         <div className={styles.footerCta}>
           <Link href="/products" className={styles.catalogLink}>
             View full manufacturing catalog
+            <ArrowUpRight size={16} strokeWidth={1.5} aria-hidden />
+          </Link>
+          <Link href={CATALOGUE_PATH} className={styles.catalogLink}>
+            View Catalogue
+            <ArrowUpRight size={16} strokeWidth={1.5} aria-hidden />
+          </Link>
+          <Link href={CATALOGUE_DOWNLOAD_PATH} className={styles.catalogLink}>
+            Download catalogue
             <ArrowUpRight size={16} strokeWidth={1.5} aria-hidden />
           </Link>
           <QuoteButton label="Request a Quote" />
@@ -119,21 +136,15 @@ export default function CollectionGrid() {
     </section>
   );
 
-  function renderCard(
-    item: (typeof collections)[number],
-    index: number
-  ) {
-    const href = `/?category=${encodeURIComponent(item.name)}`;
-    const groupLabel =
-      collectionGroups.find((g) => g.id === item.group)?.label ?? "";
+  function renderCard(item: CatalogProduct, index: number) {
+    const href = productCatalogHref(item.id);
 
     return (
       <SectionReveal>
         <Link
           href={href}
           className={styles.card}
-          onClick={(e) => handleCategoryClick(e, item.name)}
-          aria-label={`Quote enquiry: ${item.name}`}
+          aria-label={`View product: ${item.name}`}
         >
           <div className={styles.imageWrap}>
             <SafeImage
@@ -146,14 +157,14 @@ export default function CollectionGrid() {
               className={styles.image}
               sizes="(max-width: 640px) 100vw, 33vw"
             />
-            <span className={styles.badge}>{groupLabel}</span>
             <span className={styles.num}>{item.number}</span>
           </div>
           <div className={styles.body}>
+            <p className={styles.sku}>{item.sku}</p>
             <h4>{item.name}</h4>
             <p>{item.description}</p>
             <span className={styles.action}>
-              Quote
+              View spec
               <ArrowUpRight size={15} strokeWidth={1.5} />
             </span>
           </div>

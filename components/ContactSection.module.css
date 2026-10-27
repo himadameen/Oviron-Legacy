@@ -69,73 +69,140 @@
 .channels {
   display: flex;
   flex-direction: column;
-  gap: 0.65rem;
+  gap: 0.75rem;
 }
 
 .channel {
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(179, 147, 93, 0.28);
-  padding: 0.85rem 0.95rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(179, 147, 93, 0.22);
+  border-radius: var(--radius);
+  padding: 1rem 1.05rem;
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-  transition: border-color var(--transition), background var(--transition);
+  gap: 0.95rem;
+  transition:
+    border-color var(--transition),
+    background var(--transition),
+    transform var(--transition);
 }
 
 .channel:hover {
-  background: rgba(255, 255, 255, 0.09);
-  border-color: rgba(179, 147, 93, 0.45);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(179, 147, 93, 0.4);
+  transform: translateY(-1px);
 }
 
-.channelTop {
+.channelWhatsapp {
+  border-left: 3px solid #25d366;
+}
+
+.channelEmail {
+  border-left: 3px solid var(--gold);
+}
+
+.channelLinkedin {
+  border-left: 3px solid #0a66c2;
+}
+
+.channelMain {
   display: flex;
   align-items: flex-start;
-  gap: 0.75rem;
+  gap: 0.85rem;
 }
 
 .iconCircle {
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: 50%;
+  width: 2.65rem;
+  height: 2.65rem;
+  border-radius: var(--radius-pill);
   display: grid;
   place-items: center;
-  background: var(--burgundy);
   color: var(--ivory);
   flex-shrink: 0;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
 }
 
-.channel h3 {
-  margin: 0 0 0.15rem;
-  font-size: 1rem;
+.channelWhatsapp .iconCircle {
+  background: linear-gradient(145deg, #1ebe5d, #128c7e);
+}
+
+.channelEmail .iconCircle {
+  background: linear-gradient(145deg, var(--burgundy), #5a252b);
+}
+
+.channelLinkedin .iconCircle {
+  background: linear-gradient(145deg, #0a66c2, #004182);
+}
+
+.channelCopy h3 {
+  margin: 0 0 0.25rem;
+  font-size: 1.05rem;
   color: var(--ivory);
 }
 
-.channel p {
+.channelCopy p {
   margin: 0;
-  font-size: 0.75rem;
-  color: rgba(247, 243, 235, 0.62);
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: rgba(247, 243, 235, 0.68);
 }
 
-.channelBtn {
-  align-self: flex-start;
+.channelActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btnPrimary,
+.btnSecondary {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0.55rem 0.9rem;
+  gap: 0.35rem;
+  min-height: 2.5rem;
+  padding: 0.55rem 1rem;
   font-size: 0.6875rem;
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   text-decoration: none;
-  color: var(--navy);
-  background: var(--ivory);
-  border: 1px solid rgba(247, 243, 235, 0.5);
-  transition: background var(--transition), color var(--transition);
+  border-radius: var(--radius-pill);
+  transition:
+    background var(--transition),
+    color var(--transition),
+    border-color var(--transition),
+    transform var(--transition);
 }
 
-.channelBtn:hover {
+.btnPrimary {
+  color: var(--navy);
+  background: var(--ivory);
+  border: 1px solid rgba(247, 243, 235, 0.55);
+}
+
+.btnPrimary:hover {
   background: var(--white);
   color: var(--burgundy);
+  transform: translateY(-1px);
+}
+
+.btnSecondary {
+  color: rgba(247, 243, 235, 0.92);
+  background: transparent;
+  border: 1px solid rgba(179, 147, 93, 0.45);
+}
+
+.btnSecondary:hover {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+.pendingNote {
+  flex: 1 1 100%;
+  margin: 0;
+  font-size: 0.6875rem;
+  line-height: 1.4;
+  color: rgba(247, 243, 235, 0.48);
 }
 
 .formCol {
@@ -148,6 +215,7 @@
   background: var(--white);
   color: var(--grey);
   border: 1px solid rgba(179, 147, 93, 0.22);
+  border-radius: var(--radius);
 }
 
 @media (max-width: 960px) {
@@ -169,19 +237,29 @@
   }
 
   .channels {
-    max-width: 22rem;
+    max-width: 24rem;
     margin-inline: auto;
   }
 
-  .channelBtn {
-    align-self: stretch;
-    text-align: center;
-    min-height: var(--touch-min, 2.75rem);
+  .channelMain {
+    text-align: left;
   }
 
-  .channels {
-    display: grid;
-    gap: 0.65rem;
+  .channelActions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .btnPrimary,
+  .btnSecondary {
+    width: 100%;
+    min-height: var(--touch-min, 2.75rem);
   }
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .channel:hover,
+  .btnPrimary:hover {
+    transform: none;
+  }
+}

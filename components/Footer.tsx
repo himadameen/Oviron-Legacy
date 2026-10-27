@@ -3,6 +3,7 @@ import Link from "next/link";
 import { buildWhatsAppUrl } from "@/lib/contact";
 import { isContactConfigured, siteConfig } from "@/lib/site-config";
 import { footerNav } from "@/lib/routes";
+import BrandLockup from "./BrandLockup";
 import styles from "./Footer.module.css";
 
 export default function Footer() {
@@ -15,10 +16,9 @@ export default function Footer() {
     <footer className={styles.footer}>
       <div className={`container ${styles.grid}`}>
         <div>
-          <Link href="/" className={styles.brand}>
-            <span className={styles.wordmark}>Oviron</span>
-            <span className={styles.tag}>Footwear Sourcing &amp; Export</span>
-          </Link>
+          <div className={styles.brand}>
+            <BrandLockup variant="footer" />
+          </div>
           <p className={styles.blurb}>
             Leather footwear sourcing, wholesale &amp; private-label enquiries.
           </p>

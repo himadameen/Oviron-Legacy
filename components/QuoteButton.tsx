@@ -15,7 +15,7 @@ export default function QuoteButton({
   variant = "primary",
   className,
 }: Props) {
-  const isHash = href.startsWith("#") || href.includes("#contact");
+  const isInternalPath = href.startsWith("/") && !href.startsWith("//");
 
   const classes = [
     styles.btn,
@@ -32,7 +32,7 @@ export default function QuoteButton({
     </>
   );
 
-  if (isHash && !href.startsWith("http")) {
+  if (isInternalPath || href.startsWith("#")) {
     return (
       <Link href={href} className={classes}>
         {content}

@@ -31,6 +31,7 @@
   --bp-mobile: 560px;
   --touch-min: 2.75rem;
   --page-gutter: 1.25rem;
+  --site-chrome-height: 5.5rem;
 }
 
 *,
@@ -40,6 +41,7 @@
 }
 
 html {
+  scroll-padding-top: var(--site-chrome-height);
   scroll-behavior: smooth;
   scrollbar-gutter: stable;
   scrollbar-width: thin;
@@ -63,7 +65,6 @@ body.menuOpen {
 #main-content {
   width: 100%;
   max-width: 100%;
-  overflow-x: clip;
   min-width: 0;
 }
 

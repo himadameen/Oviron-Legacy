@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { siteRoutes, primaryNav, quoteHref } from "@/lib/routes";
+import BrandLockup from "./BrandLockup";
 import styles from "./Header.module.css";
 
 export default function Header() {
@@ -58,6 +59,9 @@ export default function Header() {
               className={styles.mobilePanel}
               aria-label="Mobile primary"
             >
+              <div className={styles.mobileBrand}>
+                <BrandLockup variant="mobile" onNavigate={closeMenu} />
+              </div>
               <p className={styles.mobileEyebrow}>Buyer menu</p>
               <ul className={styles.mobileLinks}>
                 {primaryNav.map((link) => (
@@ -97,12 +101,9 @@ export default function Header() {
       className={`${styles.header} ${scrolled ? styles.scrolled : ""}`}
     >
       <div className={`container ${styles.inner}`}>
-        <Link href="/" className={styles.brand} onClick={closeMenu}>
-          <span className={styles.wordmark}>Oviron</span>
-          <span className={styles.descriptor}>
-            Footwear Sourcing &amp; Export
-          </span>
-        </Link>
+        <div className={styles.brand}>
+          <BrandLockup variant="header" onNavigate={closeMenu} />
+        </div>
 
         <nav className={styles.desktopNav} aria-label="Primary">
           <ul>

@@ -1,8 +1,7 @@
 .header {
-  position: sticky;
-  top: 0;
-  z-index: 50;
-  background: rgba(247, 243, 235, 0.92);
+  position: relative;
+  z-index: 1;
+  background: rgba(247, 243, 235, 0.96);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid transparent;
   transition: border-color var(--transition), box-shadow var(--transition);
@@ -26,25 +25,13 @@
 .brand {
   text-decoration: none;
   display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
+  align-items: center;
   min-width: 0;
 }
 
-.wordmark {
-  font-family: var(--font-heading);
-  font-size: 1.65rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--navy);
-  line-height: 1;
-}
-
-.descriptor {
-  font-size: 0.5625rem;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--grey);
+.mobileBrand {
+  margin-bottom: 1.25rem;
+  flex-shrink: 0;
 }
 
 .desktopNav ul {
@@ -209,30 +196,9 @@
     max-width: calc(100% - 3.5rem);
   }
 
-  .wordmark {
-    font-size: 1.35rem;
-    letter-spacing: 0.11em;
-  }
-
-  .descriptor {
-    display: block;
-    font-size: 0.5rem;
-    letter-spacing: 0.14em;
-    line-height: 1.35;
-    white-space: normal;
-  }
-
   .desktopNav,
   .cta {
     display: none;
-  }
-}
-
-@media (max-width: 560px) {
-  .descriptor {
-    font-size: 0.46875rem;
-    letter-spacing: 0.11em;
-    max-width: 10.5rem;
   }
 }
 

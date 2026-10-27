@@ -5,6 +5,8 @@
 export const siteConfig = {
   name: "Oviron",
   legalName: "Oviron",
+  /** Navbar, footer, and mobile menu lockup */
+  logoTagline: "Global Trade • Import • Export",
   tagline: "Crafted for Distinction. Built for the World.",
   description:
     "Explore leather footwear sourcing, wholesale supply, and private-label opportunities with Oviron. Contact us to discuss product specifications and export requirements.",

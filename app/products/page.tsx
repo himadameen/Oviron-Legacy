@@ -1,12 +1,18 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
+import { Suspense } from "react";
 import FloatingWhatsApp from "@/components/FloatingWhatsApp";
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
 import ProductListing from "@/components/ProductListing";
+import ScrollToTop from "@/components/ScrollToTop";
+import SiteChrome from "@/components/SiteChrome";
 import {
   breadcrumbJsonLd,
   productCatalogWebPageJsonLd,
 } from "@/lib/json-ld";
+import { loadCatalog } from "@/lib/catalog";
+import { redirectPathForLegacyProductQuery } from "@/lib/product-routes";
 import { pageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = pageMetadata({
@@ -25,6 +31,10 @@ export const metadata: Metadata = pageMetadata({
   ],
 });
 
+type PageProps = {
+  searchParams: Promise<{ product?: string; category?: string }>;
+};
+
 const structuredData = [
   breadcrumbJsonLd([
     { name: "Home", path: "/" },
@@ -33,7 +43,17 @@ const structuredData = [
   productCatalogWebPageJsonLd(),
 ];
 
-export default function ProductsPage() {
+export default async function ProductsPage({ searchParams }: PageProps) {
+  await loadCatalog();
+  const sp = await searchParams;
+  const canonical = redirectPathForLegacyProductQuery(
+    sp.product ?? null,
+    sp.category ?? null
+  );
+  if (canonical) {
+    redirect(canonical);
+  }
+
   return (
     <>
       {structuredData.map((data, index) => (
@@ -43,11 +63,16 @@ export default function ProductsPage() {
           dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
         />
       ))}
-      <Header />
+      <SiteChrome>
+        <Header />
+      </SiteChrome>
       <main id="main-content">
-        <ProductListing />
+        <Suspense fallback={null}>
+          <ProductListing />
+        </Suspense>
       </main>
       <Footer />
+      <ScrollToTop />
       <FloatingWhatsApp />
     </>
   );

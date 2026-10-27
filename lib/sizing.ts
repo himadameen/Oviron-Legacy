@@ -20,3 +20,10 @@ export const sizeMatrixCompact: SizeMatrix = {
   uk: "6–11",
   us: "7–12",
 };
+
+/** Belts, bags, wallets, and non-footwear accessories */
+export const sizeMatrixAccessory: SizeMatrix = {
+  eu: "Sized per spec",
+  uk: "Sized per spec",
+  us: "Sized per spec",
+};
