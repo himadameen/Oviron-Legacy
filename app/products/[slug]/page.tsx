@@ -16,7 +16,7 @@ import {
 } from "@/lib/product-catalog";
 import { getProductBySeoSlug } from "@/lib/product-routes";
 import { getProductPath, primaryColorKeywords } from "@/lib/product-slugs";
-import { CATALOGUE_DOWNLOAD_PATH, CATALOGUE_PATH } from "@/lib/catalogue-routes";
+import { CATALOGUE_PATH } from "@/lib/catalogue-routes";
 import { pageMetadata } from "@/lib/seo";
 type PageProps = {
   params: Promise<{ slug: string }>;
@@ -106,10 +106,6 @@ export default async function ProductStylePage({ params }: PageProps) {
           <div className={styles.detailCatalogueActions}>
             <Link href={CATALOGUE_PATH} className={styles.detailCatalogueLink}>
               View Catalogue
-              <ArrowUpRight size={16} strokeWidth={1.5} aria-hidden />
-            </Link>
-            <Link href={CATALOGUE_DOWNLOAD_PATH} className={styles.detailCatalogueLink}>
-              Download catalogue
               <ArrowUpRight size={16} strokeWidth={1.5} aria-hidden />
             </Link>
           </div>

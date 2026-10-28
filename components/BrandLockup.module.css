@@ -35,6 +35,28 @@
   color: rgba(247, 243, 235, 0.55);
 }
 
+.cover {
+  align-items: center;
+  text-align: center;
+  gap: 0.4rem;
+}
+
+.cover .wordmark {
+  font-size: clamp(1.35rem, 2.6vh, 1.65rem);
+  letter-spacing: 0.14em;
+  color: var(--navy);
+}
+
+.cover .tagline {
+  display: block;
+  max-width: 22rem;
+  font-size: clamp(0.5rem, 1.05vh, 0.5625rem);
+  letter-spacing: 0.18em;
+  line-height: 1.5;
+  white-space: normal;
+  color: var(--grey);
+}
+
 @media (max-width: 960px) {
   .header .wordmark {
     font-size: 1.35rem;

@@ -13,9 +13,9 @@ export default function CatalogueToolbar() {
           <ArrowLeft size={16} strokeWidth={1.5} aria-hidden />
           Back to catalog
         </Link>
-        <p className={styles.toolbarHint}>
+        {/* <p className={styles.toolbarHint}>
           Full-screen pages in browser · Download PDF (one A4 sheet per page)
-        </p>
+        </p> */}
         <CatalogueDownloadButton label="Download PDF" />
       </div>
     </div>

@@ -38,6 +38,16 @@ export type CatalogueBookPage =
       sectionLabel: string;
       subLabel: string;
       products: CatalogueProductEntry[];
+      layoutVariant: ProductLayoutVariant;
+    }
+  | {
+      type: "categorySpotlight";
+      sectionLabel: string;
+      subLabel: string;
+      description: string;
+      heroImage: string;
+      heroAlt: string;
+      featuredNames: string[];
     }
   | {
       type: "closing";
@@ -47,8 +57,23 @@ export type CatalogueBookPage =
     }
   | { type: "blank" };
 
+export type ProductLayoutVariant = 1 | 2 | 3 | 4;
+
 /** One style per page — full specifications without extra navigation. */
 const PRODUCTS_PER_PAGE = 1;
+
+function spotlightDescription(
+  sectionLabel: string,
+  subLabel: string,
+  pair: CatalogueProductEntry[]
+): string {
+  const names = pair.map((p) => p.name).join(" and ");
+  return `${names} — representative ${subLabel.toLowerCase()} styles within our ${sectionLabel.toLowerCase()} assortment. Specifications remain indicative for sourcing; confirm materials, sizing, and export packaging per enquiry.`;
+}
+
+function layoutVariantForIndex(index: number): ProductLayoutVariant {
+  return (((index - 1) % 4) + 1) as ProductLayoutVariant;
+}
 
 function chunk<T>(items: T[], size: number): T[][] {
   const out: T[][] = [];
@@ -110,15 +135,41 @@ export function buildCatalogueBookPages(doc: CatalogueDocument): CatalogueBookPa
         .map((s) => s.label),
     });
 
+    let sectionProductIndex = 0;
+    const pairBuffer: CatalogueProductEntry[] = [];
+
     for (const sub of section.subsections) {
       if (sub.products.length === 0) continue;
       for (const group of chunk(sub.products, PRODUCTS_PER_PAGE)) {
+        const product = group[0];
+        if (!product) continue;
+
+        sectionProductIndex += 1;
         body.push({
           type: "products",
           sectionLabel: section.label,
           subLabel: sub.label,
           products: group,
+          layoutVariant: layoutVariantForIndex(sectionProductIndex),
         });
+
+        pairBuffer.push(product);
+        if (pairBuffer.length === 2) {
+          body.push({
+            type: "categorySpotlight",
+            sectionLabel: section.label,
+            subLabel: sub.label,
+            description: spotlightDescription(
+              section.label,
+              sub.label,
+              pairBuffer
+            ),
+            heroImage: pairBuffer[1]?.image ?? product.image,
+            heroAlt: pairBuffer[1]?.imageAlt ?? product.imageAlt,
+            featuredNames: pairBuffer.map((p) => p.name),
+          });
+          pairBuffer.length = 0;
+        }
       }
     }
   }

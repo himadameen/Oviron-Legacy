@@ -14,7 +14,7 @@ import "./catalogue-print.css";
 export const metadata: Metadata = pageMetadata({
   title: "Product Catalogue | Oviron — Digital Book & PDF",
   description:
-    "Browse the Oviron manufacturing catalogue as a digital book or download an A4 PDF — categories, SKUs, and product specifications.",
+    "Browse the Oviron product catalogue as a digital book or download an A4 PDF — categories, SKUs, and product specifications.",
   path: "/catalogue",
   ogTitle: "Oviron Product Catalogue",
   keywords: [

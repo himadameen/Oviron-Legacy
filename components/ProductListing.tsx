@@ -8,7 +8,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { CATALOGUE_DOWNLOAD_PATH, CATALOGUE_PATH } from "@/lib/catalogue-routes";
+import { CATALOGUE_PATH } from "@/lib/catalogue-routes";
 import { getCatalog } from "@/lib/catalog";
 import {
   manufacturingProducts,
@@ -175,12 +175,8 @@ export default function ProductListing() {
                 and commercial terms aligned before production.
               </p>
               <div className={styles.heroActions}>
-                <Link href={CATALOGUE_PATH} className={styles.heroCta}>
+                <Link href={CATALOGUE_PATH} className={styles.heroCtaSecondary}>
                   View Catalogue
-                  <ArrowUpRight size={16} strokeWidth={1.5} aria-hidden />
-                </Link>
-                <Link href={CATALOGUE_DOWNLOAD_PATH} className={styles.heroCtaSecondary}>
-                  Download catalogue
                   <ArrowUpRight size={16} strokeWidth={1.5} aria-hidden />
                 </Link>
                 <Link href="/#contact" className={styles.heroCtaSecondary}>
@@ -296,10 +292,6 @@ export default function ProductListing() {
             <div className={styles.bottomActions}>
               <Link href={CATALOGUE_PATH} className={styles.catalogueLink}>
                 View Catalogue
-                <ArrowUpRight size={16} strokeWidth={1.5} aria-hidden />
-              </Link>
-              <Link href={CATALOGUE_DOWNLOAD_PATH} className={styles.catalogueLink}>
-                Download catalogue
                 <ArrowUpRight size={16} strokeWidth={1.5} aria-hidden />
               </Link>
               <QuoteButton

@@ -3,7 +3,7 @@ import { siteConfig } from "@/lib/site-config";
 import styles from "./BrandLockup.module.css";
 
 type BrandLockupProps = {
-  variant?: "header" | "footer" | "mobile";
+  variant?: "header" | "footer" | "mobile" | "cover";
   /** When false, render spans only (e.g. inside an existing link). */
   asLink?: boolean;
   onNavigate?: () => void;

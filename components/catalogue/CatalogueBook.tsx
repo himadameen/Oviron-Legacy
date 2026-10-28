@@ -3,7 +3,6 @@
 import {
   ChevronLeft,
   ChevronRight,
-  LayoutGrid,
   Pause,
   Play,
 } from "lucide-react";
@@ -16,15 +15,13 @@ import {
   type PointerEvent as ReactPointerEvent,
 } from "react";
 import type { CatalogueBookPage } from "@/lib/catalog/build-catalogue-pages";
-import {
-  cataloguePagesForViewer,
-  tocJumpTargets,
-} from "@/lib/catalog/catalogue-page-utils";
+import { cataloguePagesForViewer } from "@/lib/catalog/catalogue-page-utils";
 import CataloguePageContent from "./CataloguePageContent";
 import styles from "./CatalogueBook.module.css";
 
 const AUTO_MS = 6000;
 const ANIM_MS = 520;
+const SWIPE_MIN_PX = 36;
 
 type CatalogueBookProps = {
   pages: CatalogueBookPage[];
@@ -32,18 +29,22 @@ type CatalogueBookProps = {
 
 type AnimPhase = "idle" | "leave" | "enter";
 
+type SwipeStart = { x: number; y: number; pointerId: number };
+
 export default function CatalogueBook({ pages }: CatalogueBookProps) {
   const viewerPages = useMemo(() => cataloguePagesForViewer(pages), [pages]);
-  const jumpTargets = useMemo(() => tocJumpTargets(pages), [pages]);
+  // const jumpTargets = useMemo(() => tocJumpTargets(pages), [pages]);
 
   const [pageIndex, setPageIndex] = useState(0);
   const [animPhase, setAnimPhase] = useState<AnimPhase>("idle");
   const [animDir, setAnimDir] = useState<"next" | "prev">("next");
   const [autoPlay, setAutoPlay] = useState(false);
-  const [contentsOpen, setContentsOpen] = useState(false);
+  // const [contentsOpen, setContentsOpen] = useState(false);
 
-  const swipeStart = useRef<{ x: number; y: number } | null>(null);
+  const swipeStart = useRef<SwipeStart | null>(null);
   const animLock = useRef(false);
+  // const contentsWrapRef = useRef<HTMLDivElement>(null);
+  // const contentsPanelRef = useRef<HTMLElement>(null);
 
   const pageCount = viewerPages.length;
   const currentPage = viewerPages[pageIndex] ?? viewerPages[0];
@@ -97,27 +98,60 @@ export default function CatalogueBook({ pages }: CatalogueBookProps) {
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
-      if (contentsOpen) return;
       if (event.key === "ArrowRight") goNext();
       if (event.key === "ArrowLeft") goPrev();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [contentsOpen, goNext, goPrev]);
+  }, [goNext, goPrev]);
 
-  const onPointerDown = (event: ReactPointerEvent) => {
-    swipeStart.current = { x: event.clientX, y: event.clientY };
+  // Contents panel — click-outside (re-enable with Contents button)
+  // useEffect(() => {
+  //   if (!contentsOpen) return;
+  //   ...
+  // }, [contentsOpen]);
+
+  const finishSwipe = useCallback(
+    (clientX: number, clientY: number) => {
+      const start = swipeStart.current;
+      swipeStart.current = null;
+      if (!start) return;
+      const dx = clientX - start.x;
+      const dy = clientY - start.y;
+      if (Math.abs(dx) < SWIPE_MIN_PX) return;
+      if (Math.abs(dx) < Math.abs(dy) * 1.15) return;
+      if (dx < 0) goNext();
+      else goPrev();
+    },
+    [goNext, goPrev]
+  );
+
+  const onSwipePointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (event.button !== 0) return;
+    if ((event.target as HTMLElement).closest("button, a, input, label")) return;
+    swipeStart.current = {
+      x: event.clientX,
+      y: event.clientY,
+      pointerId: event.pointerId,
+    };
+    event.currentTarget.setPointerCapture(event.pointerId);
   };
 
-  const onPointerUp = (event: ReactPointerEvent) => {
+  const onSwipePointerUp = (event: ReactPointerEvent<HTMLDivElement>) => {
     const start = swipeStart.current;
-    swipeStart.current = null;
-    if (!start) return;
-    const dx = event.clientX - start.x;
-    const dy = event.clientY - start.y;
-    if (Math.abs(dx) < 48 || Math.abs(dx) < Math.abs(dy)) return;
-    if (dx < 0) goNext();
-    else goPrev();
+    if (!start || start.pointerId !== event.pointerId) return;
+    try {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    } catch {
+      /* already released */
+    }
+    finishSwipe(event.clientX, event.clientY);
+  };
+
+  const onSwipePointerCancel = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (swipeStart.current?.pointerId === event.pointerId) {
+      swipeStart.current = null;
+    }
   };
 
   const pageAnimClass =
@@ -134,15 +168,30 @@ export default function CatalogueBook({ pages }: CatalogueBookProps) {
   return (
     <div className={styles.viewerShell}>
       <div className={styles.viewerTopBar}>
-        <button
-          type="button"
-          className={styles.contentsBtn}
-          onClick={() => setContentsOpen((open) => !open)}
-          aria-expanded={contentsOpen}
-        >
-          <LayoutGrid size={16} strokeWidth={1.5} aria-hidden />
-          Contents
-        </button>
+        <div className={styles.topBarStart}>
+          {/* Contents — temporarily disabled
+          <div className={styles.contentsWrap} ref={contentsWrapRef}>
+            <button type="button" className={styles.contentsBtn} ...>
+              Contents
+            </button>
+          </div>
+          */}
+
+          <button
+            type="button"
+            className={autoPlay ? styles.autoBtnOn : styles.autoBtn}
+            onClick={() => setAutoPlay((on) => !on)}
+            aria-pressed={autoPlay}
+          >
+            {autoPlay ? (
+              <Pause size={16} strokeWidth={1.5} aria-hidden />
+            ) : (
+              <Play size={16} strokeWidth={1.5} aria-hidden />
+            )}
+            Auto {autoPlay ? "on" : "off"}
+          </button>
+        </div>
+
         <label className={styles.pageSliderLabel}>
           Page
           <input
@@ -162,38 +211,14 @@ export default function CatalogueBook({ pages }: CatalogueBookProps) {
         </label>
       </div>
 
-      {contentsOpen ? (
-        <div className={styles.contentsPanel} role="navigation" aria-label="Catalogue contents">
-          <ul>
-            {jumpTargets.map((item) => (
-              <li key={`${item.id}-${item.pageIndex}`}>
-                <button
-                  type="button"
-                  className={
-                    pageIndex === item.pageIndex
-                      ? styles.contentsLinkActive
-                      : styles.contentsLink
-                  }
-                  onClick={() => {
-                    goToPage(
-                      item.pageIndex,
-                      item.pageIndex > pageIndex ? "next" : "prev"
-                    );
-                    setContentsOpen(false);
-                  }}
-                >
-                  <span>{item.label}</span>
-                  {item.count != null ? (
-                    <span className={styles.contentsMeta}>{item.count} styles</span>
-                  ) : null}
-                </button>
-              </li>
-            ))}
-          </ul>
-        </div>
-      ) : null}
+      {/* Contents sections panel — temporarily disabled (see Contents button) */}
 
-      <div className={styles.viewerStage}>
+      <div
+        className={styles.viewerStage}
+        onPointerDown={onSwipePointerDown}
+        onPointerUp={onSwipePointerUp}
+        onPointerCancel={onSwipePointerCancel}
+      >
         <button
           type="button"
           className={styles.navBtn}
@@ -204,11 +229,7 @@ export default function CatalogueBook({ pages }: CatalogueBookProps) {
           <ChevronLeft size={28} strokeWidth={1.5} aria-hidden />
         </button>
 
-        <div
-          className={styles.pageViewport}
-          onPointerDown={onPointerDown}
-          onPointerUp={onPointerUp}
-        >
+        <div className={styles.pageViewport}>
           <div
             key={pageIndex}
             className={`${styles.pageFrame} ${pageAnimClass}`}
@@ -237,24 +258,9 @@ export default function CatalogueBook({ pages }: CatalogueBookProps) {
         </button>
       </div>
 
-      <div className={styles.bookControls}>
-        <button
-          type="button"
-          className={autoPlay ? styles.autoBtnOn : styles.autoBtn}
-          onClick={() => setAutoPlay((on) => !on)}
-          aria-pressed={autoPlay}
-        >
-          {autoPlay ? (
-            <Pause size={16} strokeWidth={1.5} aria-hidden />
-          ) : (
-            <Play size={16} strokeWidth={1.5} aria-hidden />
-          )}
-          Auto {autoPlay ? "on" : "off"}
-        </button>
-        <p className={styles.spreadMeta}>
-          Full specifications on every style page · Swipe or use arrows
-        </p>
-      </div>
+      <p className={styles.spreadMeta}>
+        Full specifications on every style page · Swipe or use arrows
+      </p>
     </div>
   );
 }

@@ -15,15 +15,20 @@ export default function CatalogueDownloadButton({
   label = "Download",
 }: CatalogueDownloadButtonProps) {
   const [busy, setBusy] = useState(false);
+  const [progress, setProgress] = useState<{ current: number; total: number } | null>(
+    null
+  );
 
   const onDownload = useCallback(async () => {
     setBusy(true);
+    setProgress(null);
     try {
-      await downloadCataloguePdf();
+      await downloadCataloguePdf(setProgress);
     } catch {
       window.print();
     } finally {
       setBusy(false);
+      setProgress(null);
     }
   }, []);
 
@@ -38,7 +43,11 @@ export default function CatalogueDownloadButton({
       aria-busy={busy}
     >
       <Download size={16} strokeWidth={1.5} aria-hidden />
-      {busy ? "Preparing PDF…" : label}
+      {busy
+        ? progress
+          ? `Preparing PDF… ${progress.current}/${progress.total}`
+          : "Preparing PDF…"
+        : label}
     </button>
   );
 }
