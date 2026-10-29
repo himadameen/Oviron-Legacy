@@ -1,4 +1,11 @@
 import type { Metadata } from "next";
+import { brandLogo } from "./images";
+import {
+  defaultBrandShareImage,
+  metadataOpenGraphImages,
+  type OgImageDescriptor,
+  ogImageFromPath,
+} from "./seo-images";
 import { siteConfig } from "./site-config";
 import { resolveSiteOrigin } from "./site-url";
 
@@ -50,6 +57,8 @@ type PageSeoOptions = {
   ogTitle?: string;
   keywords?: string[];
   noIndex?: boolean;
+  /** Primary share image — product photo, route OG image path, or brand logo. */
+  ogImage?: OgImageDescriptor | string;
 };
 
 /** Build consistent page metadata (canonical, Open Graph, Twitter). */
@@ -61,9 +70,15 @@ export function pageMetadata(options: PageSeoOptions): Metadata {
     ogTitle,
     keywords,
     noIndex = false,
+    ogImage,
   } = options;
 
   const og = ogTitle ?? title;
+  const shareImage =
+    typeof ogImage === "string"
+      ? ogImageFromPath(ogImage, og)
+      : (ogImage ?? defaultBrandShareImage());
+  const images = metadataOpenGraphImages(shareImage);
 
   return {
     title,
@@ -80,13 +95,22 @@ export function pageMetadata(options: PageSeoOptions): Metadata {
       siteName: siteConfig.name,
       title: og,
       description,
+      images,
     },
     twitter: {
       card: "summary_large_image",
       title: og,
       description,
+      images: images.map((img) => img.url),
+      ...(twitterSiteHandle() ? { site: twitterSiteHandle() } : {}),
     },
   };
+}
+
+function twitterSiteHandle(): string | undefined {
+  const raw = process.env.NEXT_PUBLIC_TWITTER_HANDLE?.trim();
+  if (!raw) return undefined;
+  return raw.startsWith("@") ? raw : `@${raw}`;
 }
 
 /** Root layout defaults — merged with per-route metadata. */
@@ -100,6 +124,10 @@ export function rootLayoutMetadata(): Metadata {
   if (bing) {
     verification.other = { "msvalidate.01": bing };
   }
+
+  const facebookAppId = process.env.NEXT_PUBLIC_FB_APP_ID?.trim();
+  const defaultShare = defaultBrandShareImage();
+  const defaultImages = metadataOpenGraphImages(defaultShare);
 
   return {
     metadataBase: new URL(siteOrigin()),
@@ -128,16 +156,23 @@ export function rootLayoutMetadata(): Metadata {
       siteName: siteConfig.name,
       title: defaultOgTitle,
       description: siteConfig.description,
+      images: defaultImages,
     },
     twitter: {
       card: "summary_large_image",
       title: defaultOgTitle,
       description: siteConfig.description,
+      images: defaultImages.map((img) => img.url),
+      ...(twitterSiteHandle() ? { site: twitterSiteHandle() } : {}),
     },
+    ...(facebookAppId ? { facebook: { appId: facebookAppId } } : {}),
     icons: {
-      icon: [{ url: "/favicon.png", type: "image/png", sizes: "268x268" }],
-      shortcut: ["/favicon.png"],
-      apple: [{ url: "/favicon.png", type: "image/png", sizes: "268x268" }],
+      icon: [
+        { url: brandLogo.icon, type: "image/png" },
+        { url: "/favicon.png", type: "image/png", sizes: "268x268" },
+      ],
+      shortcut: [brandLogo.icon],
+      apple: [{ url: brandLogo.icon, type: "image/png" }],
     },
     manifest: "/manifest.webmanifest",
     referrer: "origin-when-cross-origin",

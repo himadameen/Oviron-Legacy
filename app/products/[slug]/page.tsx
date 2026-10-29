@@ -17,6 +17,7 @@ import {
 import { getProductBySeoSlug } from "@/lib/product-routes";
 import { getProductPath, primaryColorKeywords } from "@/lib/product-slugs";
 import { CATALOGUE_PATH } from "@/lib/catalogue-routes";
+import { ogImageFromPath } from "@/lib/seo-images";
 import { pageMetadata } from "@/lib/seo";
 type PageProps = {
   params: Promise<{ slug: string }>;
@@ -47,11 +48,17 @@ export async function generateMetadata({
   const title = `${product.name} (${product.skuRef}) | Oviron Catalog`;
   const description = `${product.description} — ${categoryLineFor(product)}. SKU ${product.skuRef}. Colors: ${colors}. ${product.upperMaterial}. Sizes ${product.sizeLabel}. B2B quote enquiry.`;
 
+  const primaryImage = product.galleryImages[0] ?? product.image;
+
   return pageMetadata({
     title,
     description,
     path,
     ogTitle: `${product.name} · ${product.skuRef} | Oviron`,
+    ogImage: ogImageFromPath(
+      primaryImage,
+      `${product.name} — ${product.skuRef}`
+    ),
     keywords: [
       product.name,
       product.skuRef,

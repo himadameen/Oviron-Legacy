@@ -6,6 +6,7 @@ import {
   webSiteJsonLd,
 } from "@/lib/json-ld";
 import PreventHorizontalScroll from "@/components/PreventHorizontalScroll";
+import MarketingAnalytics from "@/components/MarketingAnalytics";
 import { rootLayoutMetadata } from "@/lib/seo";
 import "./globals.css";
 
@@ -34,6 +35,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
+        <MarketingAnalytics />
         {structuredData.map((data, index) => (
           <script
             key={`${String(data["@type"])}-${index}`}

@@ -1,3 +1,4 @@
+import { brandLogo } from "./images";
 import { faqItems } from "./faq";
 import type { ManufacturingProduct } from "./product-catalog";
 import { categoryLineFor } from "./product-catalog";
@@ -10,14 +11,28 @@ function absoluteUrl(path: string): string {
 }
 
 export function organizationJsonLd() {
+  const logoUrl = absoluteUrl(brandLogo.full);
   return {
     "@context": "https://schema.org",
     "@type": "Organization",
     name: siteConfig.legalName,
     url: absoluteUrl("/"),
+    logo: logoUrl,
+    image: logoUrl,
     description: siteConfig.description,
     ...(siteConfig.businessEmail
-      ? { email: siteConfig.businessEmail }
+      ? {
+          email: siteConfig.businessEmail,
+          contactPoint: [
+            {
+              "@type": "ContactPoint",
+              contactType: "sales",
+              email: siteConfig.businessEmail,
+              availableLanguage: ["English"],
+              areaServed: "Worldwide",
+            },
+          ],
+        }
       : {}),
     sameAs: [
       siteConfig.linkedInUrl || undefined,
@@ -99,7 +114,12 @@ export function productJsonLd(product: ManufacturingProduct) {
     sku: product.skuRef,
     category: categoryLineFor(product),
     url: absoluteUrl(path),
-    image: product.galleryImages[0] ? absoluteUrl(product.galleryImages[0]) : undefined,
+    image:
+      product.galleryImages.length > 0
+        ? product.galleryImages.map((src) => absoluteUrl(src))
+        : product.image
+          ? absoluteUrl(product.image)
+          : undefined,
     material: product.upperMaterial,
     color: colors.length > 0 ? colors : undefined,
     audience: {
