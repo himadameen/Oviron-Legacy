@@ -166,7 +166,7 @@ export default function CatalogueBook({ pages }: CatalogueBookProps) {
         : "";
 
   return (
-    <div className={styles.viewerShell}>
+    <div className={styles.viewerShell} data-catalogue-viewer>
       <div className={styles.viewerTopBar}>
         <div className={styles.topBarStart}>
           {/* Contents — temporarily disabled
@@ -229,7 +229,7 @@ export default function CatalogueBook({ pages }: CatalogueBookProps) {
           <ChevronLeft size={28} strokeWidth={1.5} aria-hidden />
         </button>
 
-        <div className={styles.pageViewport}>
+        <div className={styles.pageViewport} data-catalogue-page-viewport>
           <div
             key={pageIndex}
             className={`${styles.pageFrame} ${pageAnimClass}`}

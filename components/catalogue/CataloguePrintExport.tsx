@@ -26,7 +26,8 @@ export default function CataloguePrintExport({ pages }: CataloguePrintExportProp
           <CataloguePageContent
             page={page}
             pageNumber={index + 1}
-            variant="print"
+            variant="screen"
+            forPdfExport
           />
         </div>
       ))}

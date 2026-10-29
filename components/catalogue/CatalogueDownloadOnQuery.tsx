@@ -15,7 +15,9 @@ export default function CatalogueDownloadOnQuery() {
     started.current = true;
 
     const timer = window.setTimeout(() => {
-      void downloadCataloguePdf().catch(() => window.print());
+      void downloadCataloguePdf().catch((error) => {
+        console.error("Catalogue PDF export failed:", error);
+      });
     }, 800);
 
     return () => window.clearTimeout(timer);

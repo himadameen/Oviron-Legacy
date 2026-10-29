@@ -1346,6 +1346,7 @@
 
 .sectionCopy {
   padding: 0.85rem 1rem 1rem;
+  text-align: center;
   background-color: rgba(255, 255, 255, 0.92);
   background-image: linear-gradient(
     180deg,
@@ -1382,6 +1383,7 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  justify-content: center;
   gap: 0.45rem;
   margin: 0.45rem 0 0;
   padding: 0;
@@ -2227,18 +2229,36 @@
   opacity: 1;
   z-index: -1;
   transform: translateX(-120vw);
-  contain: layout style paint;
 }
 
 .printSheet {
+  position: relative;
+  box-sizing: border-box;
   width: 794px;
   height: 1123px;
   overflow: hidden;
+  background: #faf8f4;
+}
+
+.printSheet > .pdfExportPage,
+.printSheet > .a4PageScreen {
+  position: relative;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  min-height: 100%;
+  flex: none;
 }
 
 .printSheetBreak {
   break-before: page;
   page-break-before: always;
+}
+
+.pdfExportPage {
+  display: flex;
+  flex-direction: column;
 }
 
 @media (max-width: 768px) {

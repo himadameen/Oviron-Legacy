@@ -24,8 +24,12 @@ export default function CatalogueDownloadButton({
     setProgress(null);
     try {
       await downloadCataloguePdf(setProgress);
-    } catch {
-      window.print();
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "PDF export failed.";
+      window.alert(
+        `${message}\n\nIf this keeps happening, hard-refresh the page (Ctrl+F5) and try again.`
+      );
     } finally {
       setBusy(false);
       setProgress(null);

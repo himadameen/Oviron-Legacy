@@ -1,67 +1,98 @@
 "use client";
 
+import html2canvas from "html2canvas";
+import { jsPDF } from "jspdf";
 import { CATALOGUE_PDF_FILENAME } from "@/lib/catalogue-routes";
+import {
+  patchFillImages,
+  waitForCataloguePaint,
+} from "./catalogue-export-utils";
 
 const EXPORT_SELECTOR = "[data-catalogue-export]";
+const VIEWPORT_SELECTOR = "[data-catalogue-page-viewport]";
 
-/** A4 at 96dpi — matches `.a4PagePrint` / `.printSheet`. */
+/** A4 at 96 CSS px/in — matches print sheet and jsPDF mm layout. */
 const A4_WIDTH_PX = 794;
 const A4_HEIGHT_PX = 1123;
+const A4_WIDTH_MM = 210;
+const A4_HEIGHT_MM = 297;
+const PX_PER_MM = A4_WIDTH_PX / A4_WIDTH_MM;
 
 export type CataloguePdfProgress = {
   current: number;
   total: number;
 };
 
-/** Opacity 1 but off-screen — html2canvas can read it; viewer stays visible. */
-function prepareExportStack(stack: HTMLElement): () => void {
-  const previous = stack.getAttribute("style");
-  stack.style.setProperty("opacity", "1", "important");
-  stack.style.setProperty("position", "fixed", "important");
-  stack.style.setProperty("left", "0", "important");
-  stack.style.setProperty("top", "0", "important");
-  stack.style.setProperty("transform", "translateX(-120vw)", "important");
-  stack.style.setProperty("z-index", "-1", "important");
-  stack.style.setProperty("visibility", "visible", "important");
-  stack.style.setProperty("pointer-events", "none", "important");
-  stack.style.setProperty("width", `${A4_WIDTH_PX}px`, "important");
+type CaptureSize = { width: number; height: number };
 
-  return () => {
-    if (previous === null) {
-      stack.removeAttribute("style");
-    } else {
-      stack.setAttribute("style", previous);
+/** Match flipbook page size without touching the visible viewer. */
+function getFlipbookCaptureSize(): CaptureSize {
+  const viewport = document.querySelector(VIEWPORT_SELECTOR);
+  if (viewport instanceof HTMLElement) {
+    const rect = viewport.getBoundingClientRect();
+    if (rect.width >= 240 && rect.height >= 320) {
+      return {
+        width: Math.round(rect.width),
+        height: Math.round(rect.height),
+      };
     }
-  };
+  }
+  return { width: A4_WIDTH_PX, height: A4_HEIGHT_PX };
 }
 
-async function waitForExportReady(root: HTMLElement): Promise<void> {
-  await document.fonts?.ready;
+function applyCaptureLayout(
+  stack: HTMLElement,
+  sheets: HTMLElement[],
+  size: CaptureSize
+): () => void {
+  const stackPrev = stack.getAttribute("style");
+  const sheetStates = sheets.map((sheet) => ({
+    sheet,
+    prev: sheet.getAttribute("style"),
+    page: sheet.firstElementChild,
+    pagePrev:
+      sheet.firstElementChild instanceof HTMLElement
+        ? sheet.firstElementChild.getAttribute("style")
+        : null,
+  }));
 
-  const imgs = Array.from(root.querySelectorAll("img"));
-  for (const img of imgs) {
-    img.loading = "eager";
-    img.decode?.().catch(() => undefined);
+  stack.style.setProperty("position", "fixed", "important");
+  stack.style.setProperty("left", "-10000px", "important");
+  stack.style.setProperty("top", "0", "important");
+  stack.style.setProperty("transform", "none", "important");
+  stack.style.setProperty("opacity", "1", "important");
+  stack.style.setProperty("visibility", "visible", "important");
+  stack.style.setProperty("pointer-events", "none", "important");
+  stack.style.setProperty("z-index", "-1", "important");
+  stack.style.setProperty("width", `${size.width}px`, "important");
+  stack.style.setProperty("background", "#faf8f4", "important");
+
+  for (const { sheet, page } of sheetStates) {
+    sheet.style.width = `${size.width}px`;
+    sheet.style.height = `${size.height}px`;
+    sheet.style.overflow = "hidden";
+    sheet.style.boxSizing = "border-box";
+    if (page instanceof HTMLElement) {
+      page.style.width = "100%";
+      page.style.maxWidth = "none";
+      page.style.height = `${size.height}px`;
+      page.style.boxSizing = "border-box";
+    }
   }
 
-  await Promise.all(
-    imgs.map(
-      (img) =>
-        new Promise<void>((resolve) => {
-          if (img.complete && img.naturalWidth > 0) {
-            resolve();
-            return;
-          }
-          const done = () => resolve();
-          img.addEventListener("load", done, { once: true });
-          img.addEventListener("error", done, { once: true });
-        })
-    )
-  );
+  return () => {
+    if (stackPrev === null) stack.removeAttribute("style");
+    else stack.setAttribute("style", stackPrev);
 
-  await new Promise<void>((resolve) => {
-    requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
-  });
+    for (const { sheet, prev, page, pagePrev } of sheetStates) {
+      if (prev === null) sheet.removeAttribute("style");
+      else sheet.setAttribute("style", prev);
+      if (page instanceof HTMLElement) {
+        if (pagePrev === null) page.removeAttribute("style");
+        else page.setAttribute("style", pagePrev);
+      }
+    }
+  };
 }
 
 function yieldToBrowser(): Promise<void> {
@@ -70,12 +101,68 @@ function yieldToBrowser(): Promise<void> {
   });
 }
 
+function resolveCaptureElement(target: HTMLElement): HTMLElement {
+  const article = target.querySelector("article");
+  return article instanceof HTMLElement ? article : target;
+}
+
+async function renderCanvasFromElement(
+  target: HTMLElement,
+  scale: number
+): Promise<{ canvas: HTMLCanvasElement; cssWidth: number; cssHeight: number }> {
+  const captureEl = resolveCaptureElement(target);
+  patchFillImages(captureEl, window);
+
+  const canvas = await html2canvas(captureEl, {
+    scale,
+    useCORS: true,
+    allowTaint: false,
+    logging: false,
+    backgroundColor: "#faf8f4",
+    windowWidth: window.innerWidth,
+    windowHeight: window.innerHeight,
+    scrollX: 0,
+    scrollY: -window.scrollY,
+    onclone: (clonedDoc) => {
+      const clonedStack = clonedDoc.querySelector(EXPORT_SELECTOR);
+      if (clonedStack instanceof HTMLElement) {
+        patchFillImages(clonedStack, clonedDoc.defaultView);
+      }
+    },
+  });
+
+  const cssWidth = Math.max(1, canvas.width / scale);
+  const cssHeight = Math.max(1, canvas.height / scale);
+
+  return { canvas, cssWidth, cssHeight };
+}
+
+/** Place snapshot at true 96dpi size, centered — never upscale to full bleed. */
+function addSnapshotToA4Page(
+  pdf: jsPDF,
+  imgData: string,
+  cssWidth: number,
+  cssHeight: number
+): void {
+  let drawW = cssWidth / PX_PER_MM;
+  let drawH = cssHeight / PX_PER_MM;
+
+  const fit = Math.min(A4_WIDTH_MM / drawW, A4_HEIGHT_MM / drawH, 1);
+  drawW *= fit;
+  drawH *= fit;
+
+  const x = (A4_WIDTH_MM - drawW) / 2;
+  const y = (A4_HEIGHT_MM - drawH) / 2;
+
+  pdf.addImage(imgData, "JPEG", x, y, drawW, drawH, undefined, "FAST");
+}
+
 export async function downloadCataloguePdf(
   onProgress?: (progress: CataloguePdfProgress) => void
 ): Promise<void> {
   const stack = document.querySelector(EXPORT_SELECTOR);
   if (!(stack instanceof HTMLElement)) {
-    throw new Error("Catalogue content is not ready to export.");
+    throw new Error("Catalogue export is not mounted yet. Refresh and try again.");
   }
 
   const sheets = Array.from(
@@ -85,13 +172,14 @@ export async function downloadCataloguePdf(
     throw new Error("No catalogue pages found for export.");
   }
 
-  const restoreStack = prepareExportStack(stack);
+  const captureSize = getFlipbookCaptureSize();
+  const restoreLayout = applyCaptureLayout(stack, sheets, captureSize);
+  const sheetDisplayRestore = sheets.map((sheet) => sheet.style.display);
+  const scale = Math.min(2, Math.max(1.5, window.devicePixelRatio || 1.5));
 
   try {
-    await waitForExportReady(stack);
-
-    const html2canvas = (await import("html2canvas")).default;
-    const { jsPDF } = await import("jspdf");
+    await waitForCataloguePaint(stack);
+    patchFillImages(stack, window);
 
     const pdf = new jsPDF({
       unit: "mm",
@@ -105,33 +193,29 @@ export async function downloadCataloguePdf(
     for (let i = 0; i < sheets.length; i++) {
       onProgress?.({ current: i + 1, total });
 
+      sheets.forEach((sheet, index) => {
+        sheet.style.display = index === i ? "block" : "none";
+      });
+
       const sheet = sheets[i];
+      await waitForCataloguePaint(sheet);
+
       if (i > 0) {
         pdf.addPage("a4", "portrait");
       }
 
-      const canvas = await html2canvas(sheet, {
-        scale: 1.75,
-        useCORS: true,
-        allowTaint: false,
-        logging: false,
-        backgroundColor: "#ffffff",
-        width: A4_WIDTH_PX,
-        height: A4_HEIGHT_PX,
-        windowWidth: A4_WIDTH_PX,
-        windowHeight: A4_HEIGHT_PX,
-        scrollX: 0,
-        scrollY: 0,
-      });
-
-      const imgData = canvas.toDataURL("image/jpeg", 0.92);
-      pdf.addImage(imgData, "JPEG", 0, 0, 210, 297, undefined, "FAST");
+      const snapshot = await renderCanvasFromElement(sheet, scale);
+      const imgData = snapshot.canvas.toDataURL("image/jpeg", 0.92);
+      addSnapshotToA4Page(pdf, imgData, snapshot.cssWidth, snapshot.cssHeight);
 
       await yieldToBrowser();
     }
 
     pdf.save(CATALOGUE_PDF_FILENAME);
   } finally {
-    restoreStack();
+    sheets.forEach((sheet, index) => {
+      sheet.style.display = sheetDisplayRestore[index] ?? "";
+    });
+    restoreLayout();
   }
 }

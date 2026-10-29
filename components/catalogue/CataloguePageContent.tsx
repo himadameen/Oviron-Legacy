@@ -72,6 +72,8 @@ type Props = {
   page: CatalogueBookPage;
   pageNumber: number;
   variant?: "screen" | "print";
+  /** Off-screen stack for html2canvas — match flipbook layout, PDF-safe footers. */
+  forPdfExport?: boolean;
   onJumpToPage?: (pageIndex: number) => void;
 };
 
@@ -79,16 +81,19 @@ export default function CataloguePageContent({
   page,
   pageNumber,
   variant = "print",
+  forPdfExport = false,
   onJumpToPage,
 }: Props) {
   const isScreen = variant === "screen";
   /** Eager-load images for flipbook and off-screen PDF export stack. */
   const imagePriority = true;
   const pageClass = isScreen ? styles.a4PageScreen : styles.a4PagePrint;
+  const exportPageClass = forPdfExport ? styles.pdfExportPage : "";
 
   const imageSizes = isScreen
     ? "(max-width: 900px) 88vw, 520px"
     : "360px";
+  const showProductOnlineFoot = isScreen || forPdfExport;
 
   const footer = (
     <footer className={styles.pageFooter}>
@@ -108,7 +113,7 @@ export default function CataloguePageContent({
     case "cover":
       return (
         <article
-          className={`${pageClass} ${styles.pageCover} ${styles.brochurePage}`}
+          className={`${pageClass} ${exportPageClass} ${styles.pageCover} ${styles.brochurePage}`}
           data-page={pageNumber}
         >
           <div className={styles.coverTopBand}>
@@ -158,7 +163,7 @@ export default function CataloguePageContent({
     case "welcome":
       return (
         <article
-          className={`${pageClass} ${styles.pageWelcome} ${styles.brochurePage}`}
+          className={`${pageClass} ${exportPageClass} ${styles.pageWelcome} ${styles.brochurePage}`}
           data-page={pageNumber}
         >
           <div className={`${styles.brochureHeroBand} ${styles.brochureHeroBandIntro}`}>
@@ -202,7 +207,7 @@ export default function CataloguePageContent({
     case "toc":
       return (
         <article
-          className={`${pageClass} ${styles.pageToc} ${styles.brochurePage}`}
+          className={`${pageClass} ${exportPageClass} ${styles.pageToc} ${styles.brochurePage}`}
           data-page={pageNumber}
         >
           <div className={`${styles.brochureHeroBand} ${styles.brochureHeroBandToc}`}>
@@ -253,7 +258,7 @@ export default function CataloguePageContent({
     case "section":
       return (
         <article
-          className={`${pageClass} ${styles.pageSection} ${styles.brochurePage}`}
+          className={`${pageClass} ${exportPageClass} ${styles.pageSection} ${styles.brochurePage}`}
           data-page={pageNumber}
         >
           <div className={styles.sectionHero}>
@@ -297,7 +302,7 @@ export default function CataloguePageContent({
     case "products":
       return (
         <article
-          className={`${pageClass} ${styles.pageProducts} ${styles.brochurePage}`}
+          className={`${pageClass} ${exportPageClass} ${styles.pageProducts} ${styles.brochurePage}`}
           data-page={pageNumber}
         >
           <ul className={styles.productSpecList}>
@@ -309,7 +314,8 @@ export default function CataloguePageContent({
                   subLabel={page.subLabel}
                   layoutVariant={page.layoutVariant}
                   imageSizes={imageSizes}
-                  showOnlineLink={isScreen}
+                  showOnlineLink={showProductOnlineFoot}
+                  forPdfExport={forPdfExport}
                 />
               </li>
             ))}
@@ -322,7 +328,7 @@ export default function CataloguePageContent({
     case "categorySpotlight":
       return (
         <article
-          className={`${pageClass} ${styles.pageSpotlight} ${styles.brochurePage}`}
+          className={`${pageClass} ${exportPageClass} ${styles.pageSpotlight} ${styles.brochurePage}`}
           data-page={pageNumber}
         >
           <header className={styles.productHeaderBand}>
@@ -371,7 +377,7 @@ export default function CataloguePageContent({
 
       return (
         <article
-          className={`${pageClass} ${styles.pageClosing} ${styles.brochurePage}`}
+          className={`${pageClass} ${exportPageClass} ${styles.pageClosing} ${styles.brochurePage}`}
           data-page={pageNumber}
         >
           <div
@@ -454,7 +460,7 @@ export default function CataloguePageContent({
                     Contact form
                   </a>
                 ) : null}
-                {!mailHref && !whatsappHref ? (
+                {!forPdfExport && !mailHref && !whatsappHref ? (
                   <p className={styles.closingCtaPlaceholder}>
                     Add business email or WhatsApp in site configuration to enable
                     one-click enquiry links on this page.
@@ -490,6 +496,15 @@ function specValue(
   label: string
 ): string {
   return lines.find((line) => line.label === label)?.value?.trim() || "—";
+}
+
+function shouldShowRawProductUrl(url: string): boolean {
+  if (!url.trim()) return false;
+  try {
+    return new URL(url).hostname !== "example.com";
+  } catch {
+    return true;
+  }
 }
 
 function catalogueDetailList(
@@ -561,6 +576,7 @@ function ProductSpecSheet({
   layoutVariant,
   imageSizes,
   showOnlineLink,
+  forPdfExport = false,
 }: {
   product: CatalogueProductEntry;
   sectionLabel: string;
@@ -568,6 +584,7 @@ function ProductSpecSheet({
   layoutVariant: ProductLayoutVariant;
   imageSizes: string;
   showOnlineLink: boolean;
+  forPdfExport?: boolean;
 }) {
   const detailItems = catalogueDetailList(
     product,
@@ -603,12 +620,16 @@ function ProductSpecSheet({
 
       <div className={styles.productSheetFoot}>
         {showOnlineLink ? (
-          <Link href={product.productPath} className={styles.specLink}>
-            Full specifications online
-          </Link>
-        ) : (
+          forPdfExport ? (
+            <span className={styles.specLink}>Full specifications online</span>
+          ) : (
+            <Link href={product.productPath} className={styles.specLink}>
+              Full specifications online
+            </Link>
+          )
+        ) : shouldShowRawProductUrl(product.productUrl) ? (
           <p className={styles.specUrl}>{product.productUrl}</p>
-        )}
+        ) : null}
       </div>
     </div>
   );
