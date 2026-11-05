@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import FloatingWhatsApp from "@/components/FloatingWhatsApp";
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
+import ProductDetailView from "@/components/ProductDetailView";
 import ProductManufacturingCard from "@/components/ProductManufacturingCard";
 import ScrollToTop from "@/components/ScrollToTop";
 import SiteChrome from "@/components/SiteChrome";
@@ -14,11 +15,15 @@ import {
   categoryLineFor,
   manufacturingProducts,
 } from "@/lib/product-catalog";
-import { getProductBySeoSlug } from "@/lib/product-routes";
+import {
+  getProductBySeoSlug,
+  productCatalogFilterHref,
+} from "@/lib/product-routes";
 import { getProductPath, primaryColorKeywords } from "@/lib/product-slugs";
 import { CATALOGUE_PATH } from "@/lib/catalogue-routes";
 import { ogImageFromPath } from "@/lib/seo-images";
 import { pageMetadata } from "@/lib/seo";
+
 type PageProps = {
   params: Promise<{ slug: string }>;
 };
@@ -77,12 +82,27 @@ export default async function ProductStylePage({ params }: PageProps) {
   if (!product) notFound();
 
   const path = getProductPath(product);
-  const colors = primaryColorKeywords(product.colorRuns);
+  const mainFilterHref = productCatalogFilterHref(product.mainCategoryId);
+  const subFilterHref = productCatalogFilterHref(
+    product.mainCategoryId,
+    product.subCategoryId
+  );
+
+  const related = manufacturingProducts
+    .filter(
+      (p) =>
+        p.id !== product.id &&
+        p.mainCategoryId === product.mainCategoryId &&
+        p.subCategoryId === product.subCategoryId
+    )
+    .slice(0, 4);
 
   const structuredData = [
     breadcrumbJsonLd([
       { name: "Home", path: "/" },
       { name: "Product catalog", path: "/products" },
+      { name: product.mainCategoryLabel, path: mainFilterHref },
+      { name: product.subCategoryLabel, path: subFilterHref },
       { name: product.name, path },
     ]),
     productJsonLd(product),
@@ -102,41 +122,66 @@ export default async function ProductStylePage({ params }: PageProps) {
       </SiteChrome>
       <main id="main-content" className={styles.detailWrap}>
         <div className={`container ${styles.detailHero}`}>
-          <nav className={styles.breadcrumb} aria-label="Breadcrumb">
+          <nav
+            className={`${styles.breadcrumb} ${styles.breadcrumbLight}`}
+            aria-label="Breadcrumb"
+          >
             <Link href="/">Home</Link>
             <ChevronRight size={14} aria-hidden />
             <Link href="/products">Product catalog</Link>
             <ChevronRight size={14} aria-hidden />
+            <Link href={mainFilterHref}>{product.mainCategoryLabel}</Link>
+            <ChevronRight size={14} aria-hidden />
+            <Link href={subFilterHref}>{product.subCategoryLabel}</Link>
+            <ChevronRight size={14} aria-hidden />
             <span aria-current="page">{product.name}</span>
           </nav>
-
-          <div className={styles.detailCatalogueActions}>
-            <Link href={CATALOGUE_PATH} className={styles.detailCatalogueLink}>
-              View Catalogue
-              <ArrowUpRight size={16} strokeWidth={1.5} aria-hidden />
-            </Link>
-          </div>
-
-          <ul className={styles.detailMeta}>
-            <li>
-              <strong>SKU</strong> {product.skuRef}
-            </li>
-            <li>
-              <strong>Category</strong> {categoryLineFor(product)}
-            </li>
-            {colors.length > 0 ? (
-              <li>
-                <strong>Colors</strong> {colors.join(" · ")}
-              </li>
-            ) : null}
-            <li>
-              <strong>Sizes</strong> {product.sizeLabel}
-            </li>
-          </ul>
         </div>
 
         <div className="container">
-          <ProductManufacturingCard product={product} index={0} />
+          <ProductDetailView product={product} />
+        </div>
+
+        {related.length > 0 ? (
+          <section
+            className={styles.detailRelated}
+            aria-labelledby="related-styles-heading"
+          >
+            <div className="container">
+              <header className={styles.detailRelatedHead}>
+                <p className={styles.detailRelatedEyebrow}>
+                  {product.subCategoryLabel}
+                </p>
+                <h2 id="related-styles-heading">Related styles</h2>
+                <p>
+                  More {product.mainCategoryLabel.toLowerCase()} in{" "}
+                  {product.subCategoryLabel.toLowerCase()} — open a style for
+                  full specifications.
+                </p>
+              </header>
+              <ul className={styles.detailRelatedList}>
+                {related.map((item, index) => (
+                  <li key={item.id}>
+                    <ProductManufacturingCard
+                      product={item}
+                      index={index}
+                      showStyleLink
+                    />
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </section>
+        ) : null}
+
+        <div className={`container ${styles.detailFooterActions}`}>
+          <Link href={CATALOGUE_PATH} className={styles.detailCatalogueLink}>
+            View full catalogue
+            <ArrowUpRight size={16} strokeWidth={1.5} aria-hidden />
+          </Link>
+          <Link href="/products" className={styles.detailBackLink}>
+            Back to product catalog
+          </Link>
         </div>
       </main>
       <Footer />

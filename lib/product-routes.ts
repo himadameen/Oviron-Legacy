@@ -19,6 +19,18 @@ export function productCatalogHref(productId: string): string {
   return product ? getProductPath(product) : "/products";
 }
 
+/** Product listing filtered by main (and optional sub) category. */
+export function productCatalogFilterHref(
+  mainCategoryId: string,
+  subCategoryId?: string
+): string {
+  const params = new URLSearchParams({ main: mainCategoryId });
+  if (subCategoryId) {
+    params.set("sub", subCategoryId);
+  }
+  return `/products?${params.toString()}#catalog-top`;
+}
+
 /** Home contact form with style prefilled (SEO slug + legacy category name). */
 export function productQuoteHref(product: ManufacturingProduct): string {
   const params = new URLSearchParams({

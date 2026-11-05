@@ -7,6 +7,7 @@ import {
   Hammer,
 } from "lucide-react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { CATALOGUE_PATH } from "@/lib/catalogue-routes";
 import { getCatalog } from "@/lib/catalog";
@@ -108,7 +109,31 @@ function PaginatedProductList({
 
 export default function ProductListing() {
   const catalog = getCatalog();
+  const searchParams = useSearchParams();
   const [activeMain, setActiveMain] = useState<string | "all">("all");
+
+  useEffect(() => {
+    const main = searchParams.get("main");
+    if (!main) return;
+    const exists = catalog.mainCategories.some((m) => m.id === main);
+    if (exists) {
+      setActiveMain(main);
+    }
+  }, [searchParams, catalog.mainCategories]);
+
+  useEffect(() => {
+    const main = searchParams.get("main");
+    const sub = searchParams.get("sub");
+    if (!main || !sub) return;
+
+    const frame = window.requestAnimationFrame(() => {
+      document
+        .getElementById(`catalog-${main}-${sub}`)
+        ?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [searchParams]);
 
   const filteredProducts = useMemo(() => {
     if (activeMain === "all") return manufacturingProducts;
@@ -120,23 +145,27 @@ export default function ProductListing() {
       const main = catalog.mainCategories.find((m) => m.id === activeMain);
       if (!main) return [];
       return main.subcategories.map((sub) => ({
+        mainId: main.id,
+        subId: sub.id,
         mainLabel: main.label,
         subLabel: sub.label,
         subtitle: sub.description,
-        items: sub.products.map(
-          (p) => manufacturingProducts.find((m) => m.id === p.id)!
-        ).filter(Boolean),
+        items: sub.products
+          .map((p) => manufacturingProducts.find((m) => m.id === p.id)!)
+          .filter(Boolean),
       }));
     }
 
     return catalog.mainCategories.flatMap((main) =>
       main.subcategories.map((sub) => ({
+        mainId: main.id,
+        subId: sub.id,
         mainLabel: main.label,
         subLabel: sub.label,
         subtitle: sub.description,
-        items: sub.products.map(
-          (p) => manufacturingProducts.find((m) => m.id === p.id)!
-        ).filter(Boolean),
+        items: sub.products
+          .map((p) => manufacturingProducts.find((m) => m.id === p.id)!)
+          .filter(Boolean),
       }))
     );
   }, [activeMain, catalog.mainCategories]);
@@ -257,6 +286,7 @@ export default function ProductListing() {
           {groupedBlocks.map((block) => (
             <div
               key={`${block.mainLabel}-${block.subLabel}`}
+              id={`catalog-${block.mainId}-${block.subId}`}
               className={styles.group}
             >
               <header className={styles.groupHead}>
