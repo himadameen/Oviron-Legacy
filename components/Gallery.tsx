@@ -28,7 +28,6 @@ export default function Gallery() {
           <SectionIntro
             eyebrow="Gallery"
             title="Work &amp; footwear in focus."
-            lead={`Preview ${preview.length} frames — open the collage for all ${galleryItems.length} images.`}
             align="center"
             titleId="gallery-heading"
           />

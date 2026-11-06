@@ -11,7 +11,7 @@ import {
   breadcrumbJsonLd,
   productCatalogWebPageJsonLd,
 } from "@/lib/json-ld";
-import { loadCatalog } from "@/lib/catalog";
+import { getCatalog } from "@/lib/catalog";
 import { redirectPathForLegacyProductQuery } from "@/lib/product-routes";
 import { pageMetadata } from "@/lib/seo";
 
@@ -44,11 +44,12 @@ const structuredData = [
 ];
 
 export default async function ProductsPage({ searchParams }: PageProps) {
-  await loadCatalog();
+  const catalog = getCatalog();
   const sp = await searchParams;
   const canonical = redirectPathForLegacyProductQuery(
     sp.product ?? null,
-    sp.category ?? null
+    sp.category ?? null,
+    catalog
   );
   if (canonical) {
     redirect(canonical);

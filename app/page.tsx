@@ -22,7 +22,6 @@ import PrivateLabel from "@/components/PrivateLabel";
 import ProductSpecifications from "@/components/ProductSpecifications";
 import QualityAssurance from "@/components/QualityAssurance";
 import QualityGrades from "@/components/QualityGrades";
-import { loadCatalog } from "@/lib/catalog";
 import { pageMetadata } from "@/lib/seo";
 import { siteConfig } from "@/lib/site-config";
 
@@ -35,8 +34,6 @@ export const metadata: Metadata = pageMetadata({
 });
 
 export default async function HomePage() {
-  await loadCatalog();
-
   return (
     <>
       <ScrollOnLoad />

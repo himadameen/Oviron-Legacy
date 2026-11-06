@@ -7,6 +7,9 @@ import {
 } from "@/lib/json-ld";
 import PreventHorizontalScroll from "@/components/PreventHorizontalScroll";
 import MarketingAnalytics from "@/components/MarketingAnalytics";
+import StoreProvider from "@/components/StoreProvider";
+import { CatalogProvider } from "@/lib/catalog-context";
+import { loadCatalog } from "@/lib/catalog";
 import { rootLayoutMetadata } from "@/lib/seo";
 import "./globals.css";
 
@@ -20,11 +23,12 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = rootLayoutMetadata();
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const catalog = await loadCatalog();
   const structuredData = [
     organizationJsonLd(),
     webSiteJsonLd(),
@@ -44,8 +48,12 @@ export default function RootLayout({
           />
         ))}
         <div id="site-root">
-          <PreventHorizontalScroll />
-          {children}
+          <StoreProvider>
+            <CatalogProvider value={catalog}>
+              <PreventHorizontalScroll />
+              {children}
+            </CatalogProvider>
+          </StoreProvider>
         </div>
       </body>
     </html>

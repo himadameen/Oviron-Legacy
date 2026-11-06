@@ -7,7 +7,6 @@ import CatalogueBook from "@/components/catalogue/CatalogueBook";
 import CataloguePrintExport from "@/components/catalogue/CataloguePrintExport";
 import { buildCatalogueDocument } from "@/lib/catalog/build-catalogue-document";
 import { buildCatalogueBookPages } from "@/lib/catalog/build-catalogue-pages";
-import { loadCatalog } from "@/lib/catalog";
 import { pageMetadata } from "@/lib/seo";
 import "./catalogue-print.css";
 
@@ -26,7 +25,6 @@ export const metadata: Metadata = pageMetadata({
 });
 
 export default async function CataloguePage() {
-  await loadCatalog();
   const document = buildCatalogueDocument();
   const pages = buildCatalogueBookPages(document);
 

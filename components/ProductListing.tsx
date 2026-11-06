@@ -2,115 +2,118 @@
 
 import {
   ArrowUpRight,
-  ChevronLeft,
   ChevronRight,
   Hammer,
 } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
-import { CATALOGUE_PATH } from "@/lib/catalogue-routes";
-import { getCatalog } from "@/lib/catalog";
 import {
-  manufacturingProducts,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { CATALOGUE_PATH } from "@/lib/catalogue-routes";
+import { useCatalogContext } from "@/lib/catalog-context";
+import {
+  manufacturingProductsFromCatalog,
   type ManufacturingProduct,
 } from "@/lib/product-catalog";
+import { useGetStatsQuery } from "@/lib/store/api/strapiApi";
 import ProductManufacturingCard from "./ProductManufacturingCard";
 import QuoteButton from "./QuoteButton";
 import styles from "./ProductListing.module.css";
 
 const PAGE_SIZE = 2;
 
-function Pagination({
-  page,
-  totalPages,
-  onPageChange,
-  label,
-}: {
-  page: number;
-  totalPages: number;
-  onPageChange: (page: number) => void;
-  label: string;
-}) {
-  if (totalPages <= 1) return null;
-
-  return (
-    <nav className={styles.pagination} aria-label={label}>
-      <button
-        type="button"
-        className={styles.pageBtn}
-        disabled={page === 0}
-        onClick={() => onPageChange(page - 1)}
-        aria-label="Previous page"
-      >
-        <ChevronLeft size={18} />
-        Previous
-      </button>
-      <span className={styles.pageMeta}>
-        Page {page + 1} of {totalPages}
-      </span>
-      <button
-        type="button"
-        className={styles.pageBtn}
-        disabled={page >= totalPages - 1}
-        onClick={() => onPageChange(page + 1)}
-        aria-label="Next page"
-      >
-        Next
-        <ChevronRight size={18} />
-      </button>
-    </nav>
-  );
-}
-
-function PaginatedProductList({
+function LazyProductList({
   items,
   paginationKey,
-  paginationLabel,
+  blockLabel,
 }: {
   items: ManufacturingProduct[];
   paginationKey: string;
-  paginationLabel: string;
+  blockLabel: string;
 }) {
-  const [page, setPage] = useState(0);
-  const totalPages = Math.max(1, Math.ceil(items.length / PAGE_SIZE));
+  const [visibleCount, setVisibleCount] = useState(() =>
+    Math.min(PAGE_SIZE, items.length)
+  );
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    setPage(0);
-  }, [paginationKey, items.length]);
+    setVisibleCount(Math.min(PAGE_SIZE, items.length));
+  }, [paginationKey, items]);
 
-  const visible = useMemo(() => {
-    const start = page * PAGE_SIZE;
-    return items.slice(start, start + PAGE_SIZE);
-  }, [items, page]);
+  const visible = useMemo(
+    () => items.slice(0, visibleCount),
+    [items, visibleCount]
+  );
+  const hasMore = visibleCount < items.length;
+
+  const loadMore = useCallback(() => {
+    setVisibleCount((prev) => Math.min(prev + PAGE_SIZE, items.length));
+  }, [items.length]);
+
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el || !hasMore) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) loadMore();
+      },
+      { root: null, rootMargin: "240px 0px", threshold: 0 }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [hasMore, loadMore, visibleCount, items.length]);
 
   return (
     <>
-      <ul className={styles.list}>
+      <ul className={styles.list} aria-label={blockLabel}>
         {visible.map((product, index) => (
           <li key={product.id}>
             <ProductManufacturingCard
               product={product}
-              index={page * PAGE_SIZE + index}
+              index={index}
               showStyleLink
             />
           </li>
         ))}
       </ul>
-      <Pagination
-        page={page}
-        totalPages={totalPages}
-        onPageChange={setPage}
-        label={paginationLabel}
-      />
+      {hasMore ? (
+        <div
+          ref={sentinelRef}
+          className={styles.lazySentinel}
+          aria-hidden
+        />
+      ) : null}
+      {hasMore ? (
+        <p className={styles.lazyHint} aria-live="polite">
+          Scroll for more styles in this group
+        </p>
+      ) : items.length > PAGE_SIZE ? (
+        <p className={styles.lazyHint} aria-live="polite">
+          All {items.length} styles in this group are shown
+        </p>
+      ) : null}
     </>
   );
 }
 
 export default function ProductListing() {
-  const catalog = getCatalog();
-  const searchParams = useSearchParams();
+  const catalog = useCatalogContext();
+  const { data: statsData } = useGetStatsQuery();
+
   const [activeMain, setActiveMain] = useState<string | "all">("all");
+
+  const manufacturingList = useMemo(() => {
+    return manufacturingProductsFromCatalog(catalog);
+  }, [catalog]);
+
+  const searchParams = useSearchParams();
 
   useEffect(() => {
     const main = searchParams.get("main");
@@ -136,11 +139,13 @@ export default function ProductListing() {
   }, [searchParams]);
 
   const filteredProducts = useMemo(() => {
-    if (activeMain === "all") return manufacturingProducts;
-    return manufacturingProducts.filter((p) => p.mainCategoryId === activeMain);
-  }, [activeMain]);
+    if (activeMain === "all") return manufacturingList;
+    return manufacturingList.filter((p) => p.mainCategoryId === activeMain);
+  }, [activeMain, manufacturingList]);
 
   const groupedBlocks = useMemo(() => {
+    const byId = new Map(manufacturingList.map((p) => [p.id, p]));
+
     if (activeMain !== "all") {
       const main = catalog.mainCategories.find((m) => m.id === activeMain);
       if (!main) return [];
@@ -151,8 +156,8 @@ export default function ProductListing() {
         subLabel: sub.label,
         subtitle: sub.description,
         items: sub.products
-          .map((p) => manufacturingProducts.find((m) => m.id === p.id)!)
-          .filter(Boolean),
+          .map((p) => byId.get(p.id))
+          .filter(Boolean) as ManufacturingProduct[],
       }));
     }
 
@@ -164,11 +169,16 @@ export default function ProductListing() {
         subLabel: sub.label,
         subtitle: sub.description,
         items: sub.products
-          .map((p) => manufacturingProducts.find((m) => m.id === p.id)!)
-          .filter(Boolean),
+          .map((p) => byId.get(p.id))
+          .filter(Boolean) as ManufacturingProduct[],
       }))
     );
-  }, [activeMain, catalog.mainCategories]);
+  }, [activeMain, catalog.mainCategories, manufacturingList]);
+
+  const publishedStylesCount =
+    statsData?.totals.activeProducts ?? catalog.productCount;
+  const mainCategoriesCount =
+    statsData?.totals.mainCategories ?? catalog.mainCategories.length;
 
   if (catalog.productCount === 0) {
     return (
@@ -217,11 +227,11 @@ export default function ProductListing() {
 
             <ul className={styles.heroStats}>
               <li>
-                <strong>{catalog.productCount}</strong>
+                <strong>{publishedStylesCount}</strong>
                 <span>Published styles</span>
               </li>
               <li>
-                <strong>{catalog.mainCategories.length}</strong>
+                <strong>{mainCategoriesCount}</strong>
                 <span>Main categories</span>
               </li>
               <li>
@@ -302,10 +312,10 @@ export default function ProductListing() {
                   {block.items.length} styles
                 </span>
               </header>
-              <PaginatedProductList
+              <LazyProductList
                 items={block.items}
                 paginationKey={`${activeMain}-${block.mainLabel}-${block.subLabel}`}
-                paginationLabel={`${block.mainLabel} ${block.subLabel} pagination`}
+                blockLabel={`${block.mainLabel} · ${block.subLabel}`}
               />
             </div>
           ))}

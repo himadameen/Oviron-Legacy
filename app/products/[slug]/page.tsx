@@ -10,35 +10,30 @@ import ProductManufacturingCard from "@/components/ProductManufacturingCard";
 import ScrollToTop from "@/components/ScrollToTop";
 import SiteChrome from "@/components/SiteChrome";
 import styles from "@/components/ProductListing.module.css";
+import { getCatalog } from "@/lib/catalog";
 import { breadcrumbJsonLd, productJsonLd } from "@/lib/json-ld";
 import {
   categoryLineFor,
-  manufacturingProducts,
+  manufacturingProductsFromCatalog,
 } from "@/lib/product-catalog";
-import {
-  getProductBySeoSlug,
-  productCatalogFilterHref,
-} from "@/lib/product-routes";
+import { getManufacturingProductForPageSlug } from "@/lib/product-page-data";
+import { productCatalogFilterHref } from "@/lib/product-routes";
 import { getProductPath, primaryColorKeywords } from "@/lib/product-slugs";
 import { CATALOGUE_PATH } from "@/lib/catalogue-routes";
 import { ogImageFromPath } from "@/lib/seo-images";
 import { pageMetadata } from "@/lib/seo";
 
+export const dynamic = "force-dynamic";
+
 type PageProps = {
   params: Promise<{ slug: string }>;
 };
-
-export async function generateStaticParams() {
-  return manufacturingProducts.map((product) => ({
-    slug: product.seoSlug,
-  }));
-}
 
 export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const product = getProductBySeoSlug(slug);
+  const product = await getManufacturingProductForPageSlug(slug);
   if (!product) {
     return pageMetadata({
       title: "Product not found | Oviron",
@@ -78,8 +73,11 @@ export async function generateMetadata({
 
 export default async function ProductStylePage({ params }: PageProps) {
   const { slug } = await params;
-  const product = getProductBySeoSlug(slug);
+  const product = await getManufacturingProductForPageSlug(slug);
   if (!product) notFound();
+
+  const catalog = getCatalog();
+  const allManufacturing = manufacturingProductsFromCatalog(catalog);
 
   const path = getProductPath(product);
   const mainFilterHref = productCatalogFilterHref(product.mainCategoryId);
@@ -88,7 +86,7 @@ export default async function ProductStylePage({ params }: PageProps) {
     product.subCategoryId
   );
 
-  const related = manufacturingProducts
+  const related = allManufacturing
     .filter(
       (p) =>
         p.id !== product.id &&

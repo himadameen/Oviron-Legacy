@@ -1,4 +1,8 @@
-import { categoryLineFor, manufacturingProducts } from "../product-catalog";
+import {
+  categoryLineFor,
+  manufacturingProductsFromCatalog,
+  type ManufacturingProduct,
+} from "../product-catalog";
 import { getProductPath } from "../product-slugs";
 import { siteConfig } from "../site-config";
 import { absoluteSiteUrl } from "../site-url";
@@ -56,9 +60,7 @@ function formatGeneratedLabel(date: Date): string {
   });
 }
 
-function specLinesForProduct(
-  product: (typeof manufacturingProducts)[number]
-): CatalogueSpecLine[] {
+function specLinesForProduct(product: ManufacturingProduct): CatalogueSpecLine[] {
   return [
     { label: "Typical use", value: product.typicalUse },
     { label: "Upper / material", value: product.upperMaterial },
@@ -74,9 +76,8 @@ function specLinesForProduct(
 /** Single source for browser catalogue + print/PDF output. */
 export function buildCatalogueDocument(now = new Date()): CatalogueDocument {
   const catalog = getCatalog();
-  const productById = new Map(
-    manufacturingProducts.map((product) => [product.id, product])
-  );
+  const manufacturing = manufacturingProductsFromCatalog(catalog);
+  const productById = new Map(manufacturing.map((product) => [product.id, product]));
 
   const sections: CatalogueSection[] = catalog.mainCategories.map((main) => {
     const subsections: CatalogueSubsection[] = main.subcategories.map((sub) => ({

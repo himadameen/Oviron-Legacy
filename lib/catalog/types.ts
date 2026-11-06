@@ -1,4 +1,5 @@
 import type { SizeMatrix } from "../sizing";
+import type { ProductTagChip } from "../product-tags";
 
 /** Payload shape expected from the catalog API (adjust field names in normalize if needed). */
 export type CatalogApiResponse = {
@@ -44,6 +45,8 @@ export type CatalogApiProduct = {
   imageUrls?: string[];
   imageAlt: string;
   specs?: CatalogApiProductSpecs;
+  /** Merchandising labels from API (e.g. recommended, fast_moving). */
+  tags?: string[];
 };
 
 /** Normalized catalog — empty branches removed. */
@@ -80,6 +83,8 @@ export type CatalogProduct = {
   /** Display index, e.g. "01" */
   number: string;
   specs: Required<CatalogApiProductSpecs>;
+  /** Up to 2 merchandising tags for UI chips. */
+  productTags?: ProductTagChip[];
 };
 
 export type NormalizedCatalog = {

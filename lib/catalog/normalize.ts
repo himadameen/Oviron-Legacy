@@ -1,3 +1,4 @@
+import { pickProductTagChips } from "../product-tags";
 import { mergeSpecs } from "./default-specs";
 import type {
   CatalogApiResponse,
@@ -55,6 +56,7 @@ export function normalizeCatalog(raw: CatalogApiResponse): NormalizedCatalog {
               subCategoryLabel: sub.label,
               number: String(counter).padStart(2, "0"),
               specs: mergeSpecs(main.id, p.specs),
+              productTags: pickProductTagChips(p.tags),
             };
           });
 

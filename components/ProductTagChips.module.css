@@ -1,0 +1,61 @@
+.list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.compact {
+  gap: 0.3rem;
+}
+
+.chip {
+  display: inline-block;
+  padding: 0.22rem 0.5rem;
+  font-family: var(--font-body);
+  font-size: 0.5625rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border-radius: var(--radius-pill);
+  border: 1px solid transparent;
+  line-height: 1.2;
+}
+
+.compact .chip {
+  padding: 0.18rem 0.42rem;
+  font-size: 0.5rem;
+}
+
+/* Distinct fills per tag kind */
+.chip[data-tag="recommended"] {
+  background: rgba(179, 147, 93, 0.22);
+  color: var(--navy);
+  border-color: rgba(179, 147, 93, 0.45);
+}
+
+.chip[data-tag="fast_moving"] {
+  background: rgba(46, 125, 110, 0.14);
+  color: #1d4d44;
+  border-color: rgba(46, 125, 110, 0.28);
+}
+
+.chip[data-tag="most_likable"] {
+  background: rgba(90, 64, 120, 0.12);
+  color: #3d2a52;
+  border-color: rgba(90, 64, 120, 0.22);
+}
+
+.chip[data-tag="most_sale"] {
+  background: rgba(112, 46, 53, 0.14);
+  color: var(--burgundy);
+  border-color: rgba(112, 46, 53, 0.28);
+}
+
+.chip[data-tag="trending"] {
+  background: rgba(23, 42, 58, 0.1);
+  color: var(--navy);
+  border-color: rgba(23, 42, 58, 0.18);
+}

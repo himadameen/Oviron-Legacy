@@ -10,6 +10,7 @@ import { getProductPath } from "@/lib/product-slugs";
 import { productQuoteHref } from "@/lib/product-routes";
 import ProductGallery from "./product/ProductGallery";
 import ProductSpecTabs from "./product/ProductSpecTabs";
+import ProductTagChips from "./ProductTagChips";
 import QuoteButton from "./QuoteButton";
 import SectionReveal from "./SectionReveal";
 import styles from "./ProductListing.module.css";
@@ -64,6 +65,11 @@ export default function ProductManufacturingCard({
                 )}
               </h2>
               <p className={styles.cardTagline}>{product.description}</p>
+              {product.productTags.length > 0 ? (
+                <div className={styles.cardTags}>
+                  <ProductTagChips tags={product.productTags} />
+                </div>
+              ) : null}
             </div>
           </header>
 

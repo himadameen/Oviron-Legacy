@@ -9,11 +9,9 @@ import {
   formatEnquiryMessage,
   type EnquiryPayload,
 } from "@/lib/contact";
-import {
-  formatEnquiryCategoryValue,
-  getCatalog,
-} from "@/lib/catalog";
-import { getProductBySeoSlug } from "@/lib/product-routes";
+import { formatEnquiryCategoryValue } from "@/lib/catalog";
+import { useCatalogContext } from "@/lib/catalog-context";
+import { getProductBySeoSlug } from "@/lib/product-catalog";
 import { isContactConfigured, siteConfig } from "@/lib/site-config";
 import styles from "./EnquiryForm.module.css";
 
@@ -55,11 +53,11 @@ export default function EnquiryForm() {
   );
   const [notice, setNotice] = useState<string | null>(null);
 
-  const catalog = useMemo(() => getCatalog(), []);
+  const catalog = useCatalogContext();
 
   useEffect(() => {
     const styleSlug = searchParams.get("style");
-    const fromStyle = styleSlug ? getProductBySeoSlug(styleSlug) : null;
+    const fromStyle = styleSlug ? getProductBySeoSlug(styleSlug, catalog) : null;
     const fromUrl = searchParams.get("category");
     const category = fromStyle
       ? formatEnquiryCategoryValue(fromStyle)

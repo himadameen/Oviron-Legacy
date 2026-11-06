@@ -1,21 +1,18 @@
 import { formatEnquiryCategoryValue } from "./catalog";
 import {
   getProductById,
-  manufacturingProducts,
+  getProductBySeoSlug,
+  manufacturingProductsFromCatalog,
   type ManufacturingProduct,
 } from "./product-catalog";
+import type { NormalizedCatalog } from "./catalog/types";
 import { getProductPath } from "./product-slugs";
 
-export function getProductBySeoSlug(slug: string): ManufacturingProduct | null {
-  const normalized = slug.trim().toLowerCase();
-  return (
-    manufacturingProducts.find((p) => p.seoSlug === normalized) ?? null
-  );
-}
-
-/** Catalog URL for a style (SEO path). */
-export function productCatalogHref(productId: string): string {
-  const product = getProductById(productId);
+export function productCatalogHref(
+  productId: string,
+  catalog: NormalizedCatalog
+): string {
+  const product = getProductById(productId, catalog);
   return product ? getProductPath(product) : "/products";
 }
 
@@ -40,21 +37,27 @@ export function productQuoteHref(product: ManufacturingProduct): string {
   return `/?${params.toString()}#contact`;
 }
 
-export function productQuoteHrefFromId(productId: string): string {
-  const product = getProductById(productId);
+export function productQuoteHrefFromId(
+  productId: string,
+  catalog: NormalizedCatalog
+): string {
+  const product = getProductById(productId, catalog);
   return product ? productQuoteHref(product) : "/#contact";
 }
 
 /** Resolve legacy `?product=` / `?category=` query params. */
 export function resolveProductIdFromParam(
   productParam: string | null,
-  categoryParam: string | null
+  categoryParam: string | null,
+  catalog: NormalizedCatalog
 ): string | null {
+  const list = manufacturingProductsFromCatalog(catalog);
+
   if (productParam) {
-    const bySlug = getProductBySeoSlug(productParam);
+    const bySlug = getProductBySeoSlug(productParam, catalog);
     if (bySlug) return bySlug.id;
 
-    const byId = getProductById(productParam);
+    const byId = getProductById(productParam, catalog);
     if (byId) return byId.id;
   }
 
@@ -62,7 +65,7 @@ export function resolveProductIdFromParam(
   if (!category) return null;
 
   const decoded = decodeURIComponent(category);
-  const fromCatalog = manufacturingProducts.find(
+  const fromCatalog = list.find(
     (p) => p.id === decoded || p.name === decoded || p.seoSlug === decoded
   );
   return fromCatalog?.id ?? null;
@@ -70,10 +73,11 @@ export function resolveProductIdFromParam(
 
 export function redirectPathForLegacyProductQuery(
   productParam: string | null,
-  categoryParam: string | null
+  categoryParam: string | null,
+  catalog: NormalizedCatalog
 ): `/products/${string}` | null {
-  const id = resolveProductIdFromParam(productParam, categoryParam);
+  const id = resolveProductIdFromParam(productParam, categoryParam, catalog);
   if (!id) return null;
-  const product = getProductById(id);
+  const product = getProductById(id, catalog);
   return product ? getProductPath(product) : null;
 }

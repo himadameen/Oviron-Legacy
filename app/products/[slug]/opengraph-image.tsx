@@ -1,7 +1,7 @@
 import { loadBrandLogoDataUrl, loadShareImageDataUrl } from "@/lib/load-share-image";
 import { renderOgImage } from "@/lib/og-image-template";
-import { getProductBySeoSlug } from "@/lib/product-routes";
 import { categoryLineFor } from "@/lib/product-catalog";
+import { getManufacturingProductForPageSlug } from "@/lib/product-page-data";
 import { OG_IMAGE_SIZE } from "@/lib/seo-images";
 import { siteConfig } from "@/lib/site-config";
 
@@ -15,7 +15,7 @@ type PageProps = {
 
 export async function generateImageMetadata({ params }: PageProps) {
   const { slug } = await params;
-  const product = getProductBySeoSlug(slug);
+  const product = await getManufacturingProductForPageSlug(slug);
   return [
     {
       alt: product
@@ -29,7 +29,7 @@ export async function generateImageMetadata({ params }: PageProps) {
 
 export default async function ProductOpenGraphImage({ params }: PageProps) {
   const { slug } = await params;
-  const product = getProductBySeoSlug(slug);
+  const product = await getManufacturingProductForPageSlug(slug);
   const logoSrc = await loadBrandLogoDataUrl();
 
   if (!product) {

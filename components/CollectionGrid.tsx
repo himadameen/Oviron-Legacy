@@ -1,11 +1,15 @@
 "use client";
 
-import { ArrowUpRight } from "lucide-react";
+import { ArrowRight, ArrowUpRight, BookOpen, LayoutGrid } from "lucide-react";
 import Link from "next/link";
-import { useMemo, useState } from "react";
-import { CATALOGUE_DOWNLOAD_PATH, CATALOGUE_PATH } from "@/lib/catalogue-routes";
-import { getCatalog, type CatalogProduct } from "@/lib/catalog";
+import { useEffect, useMemo, useState } from "react";
+import { normalizedCatalogFromStrapiHome } from "@/lib/api/normalize-catalog-response";
+import { CATALOGUE_PATH } from "@/lib/catalogue-routes";
+import { useCatalogContext } from "@/lib/catalog-context";
+import type { CatalogProduct } from "@/lib/catalog";
 import { productCatalogHref } from "@/lib/product-routes";
+import { useGetHomeQuery } from "@/lib/store/api/strapiApi";
+import ProductTagChips from "./ProductTagChips";
 import QuoteButton from "./QuoteButton";
 import SafeImage from "./SafeImage";
 import SectionIntro from "./SectionIntro";
@@ -13,16 +17,39 @@ import SectionReveal from "./SectionReveal";
 import styles from "./CollectionGrid.module.css";
 
 function defaultMainCategoryId(
-  mains: ReturnType<typeof getCatalog>["mainCategories"]
+  mains: ReturnType<typeof useCatalogContext>["mainCategories"]
 ): string {
   return mains.find((m) => m.id === "shoes")?.id ?? mains[0]?.id ?? "";
 }
 
 export default function CollectionGrid() {
-  const catalog = getCatalog();
+  const serverCatalog = useCatalogContext();
+  const useApi = Boolean(process.env.NEXT_PUBLIC_STRAPI_URL?.trim());
+  const { data: home, isFetching, isError } = useGetHomeQuery(
+    { page: 1, pageSize: 8 },
+    { skip: !useApi }
+  );
+
+  const catalog = useMemo(() => {
+    if (!useApi || isError || !home) return serverCatalog;
+    try {
+      return normalizedCatalogFromStrapiHome(home);
+    } catch {
+      return serverCatalog;
+    }
+  }, [useApi, isError, home, serverCatalog]);
+
   const [activeMain, setActiveMain] = useState(() =>
     defaultMainCategoryId(catalog.mainCategories)
   );
+
+  useEffect(() => {
+    setActiveMain((prev) => {
+      const stillValid = catalog.mainCategories.some((m) => m.id === prev);
+      if (stillValid) return prev;
+      return defaultMainCategoryId(catalog.mainCategories);
+    });
+  }, [catalog.mainCategories]);
 
   const activeCategory = useMemo(
     () => catalog.mainCategories.find((m) => m.id === activeMain),
@@ -42,9 +69,20 @@ export default function CollectionGrid() {
     return null;
   }
 
-  const styleCount =
-    activeCategory?.productCount ??
-    blocks.reduce((n, b) => n + b.products.length, 0);
+  if (useApi && isFetching && catalog === serverCatalog && serverCatalog.productCount === 0) {
+    return (
+      <section
+        id="collections"
+        className="section"
+        aria-labelledby="collections-heading"
+        aria-busy="true"
+      >
+        <div className="container">
+          <p className="text-muted">Loading collections…</p>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section
@@ -91,12 +129,6 @@ export default function CollectionGrid() {
               </button>
             ))}
           </div>
-          {activeCategory ? (
-            <p className={styles.categoryMeta}>
-              {styleCount} style{styleCount === 1 ? "" : "s"} in{" "}
-              {activeCategory.label}
-            </p>
-          ) : null}
         </div>
 
         <div className={styles.blocks}>
@@ -118,26 +150,40 @@ export default function CollectionGrid() {
         </div>
 
         <div className={styles.footerCta}>
-          <Link href="/products" className={styles.catalogLink}>
-            View full manufacturing catalog
-            <ArrowUpRight size={16} strokeWidth={1.5} aria-hidden />
-          </Link>
-          <Link href={CATALOGUE_PATH} className={styles.catalogLink}>
-            View Catalogue
-            <ArrowUpRight size={16} strokeWidth={1.5} aria-hidden />
-          </Link>
-          <Link href={CATALOGUE_DOWNLOAD_PATH} className={styles.catalogLink}>
-            Download catalogue
-            <ArrowUpRight size={16} strokeWidth={1.5} aria-hidden />
-          </Link>
-          <QuoteButton label="Request a Quote" />
+          <div className={styles.footerCtaActions}>
+            <Link href="/products" className={styles.footerBtnGhost}>
+              <span className={styles.footerBtnIcon} aria-hidden>
+                <LayoutGrid size={20} strokeWidth={1.5} />
+              </span>
+              <span className={styles.footerBtnLabel}>
+                <span className={styles.footerBtnTitle}>Manufacturing catalog</span>
+                <span className={styles.footerBtnHint}>Browse all styles &amp; specs</span>
+              </span>
+              <ArrowRight size={18} strokeWidth={1.5} aria-hidden className={styles.footerBtnArrow} />
+            </Link>
+            <Link href={CATALOGUE_PATH} className={styles.footerBtnGhost}>
+              <span className={styles.footerBtnIcon} aria-hidden>
+                <BookOpen size={20} strokeWidth={1.5} />
+              </span>
+              <span className={styles.footerBtnLabel}>
+                <span className={styles.footerBtnTitle}>Digital catalogue</span>
+                <span className={styles.footerBtnHint}>Flipbook &amp; print layout</span>
+              </span>
+              <ArrowRight size={18} strokeWidth={1.5} aria-hidden className={styles.footerBtnArrow} />
+            </Link>
+            <QuoteButton
+              className={styles.footerBtnPrimary}
+              label="Request a quote"
+              href="/#contact"
+            />
+          </div>
         </div>
       </div>
     </section>
   );
 
   function renderCard(item: CatalogProduct, index: number) {
-    const href = productCatalogHref(item.id);
+    const href = productCatalogHref(item.id, catalog);
 
     return (
       <SectionReveal>
@@ -161,6 +207,11 @@ export default function CollectionGrid() {
           </div>
           <div className={styles.body}>
             <p className={styles.sku}>{item.sku}</p>
+            {item.productTags?.length ? (
+              <div className={styles.tagRow}>
+                <ProductTagChips tags={item.productTags} size="compact" />
+              </div>
+            ) : null}
             <h4>{item.name}</h4>
             <p>{item.description}</p>
             <span className={styles.action}>

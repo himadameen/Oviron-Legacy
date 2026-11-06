@@ -10,6 +10,7 @@ import { CATALOGUE_PATH } from "@/lib/catalogue-routes";
 import { productQuoteHref } from "@/lib/product-routes";
 import ProductGallery from "./product/ProductGallery";
 import ProductSpecTabs from "./product/ProductSpecTabs";
+import ProductTagChips from "./ProductTagChips";
 import QuoteButton from "./QuoteButton";
 import SectionReveal from "./SectionReveal";
 import styles from "./ProductListing.module.css";
@@ -46,6 +47,11 @@ export default function ProductDetailView({ product }: ProductDetailViewProps) {
               </p>
               <h1 className={styles.detailTitle}>{product.name}</h1>
               <p className={styles.detailLead}>{product.description}</p>
+              {product.productTags.length > 0 ? (
+                <div className={styles.detailTagRow}>
+                  <ProductTagChips tags={product.productTags} />
+                </div>
+              ) : null}
               <div className={styles.detailActions}>
                 <QuoteButton
                   href={quoteHref}

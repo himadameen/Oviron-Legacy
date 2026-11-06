@@ -1,11 +1,14 @@
 import type { MetadataRoute } from "next";
-import { manufacturingProducts } from "@/lib/product-catalog";
+import { getCatalog, loadCatalog } from "@/lib/catalog";
+import { manufacturingProductsFromCatalog } from "@/lib/product-catalog";
 import { getProductPath } from "@/lib/product-slugs";
 import { sitemapEntries } from "@/lib/seo";
 import { siteConfig } from "@/lib/site-config";
 import { resolveSiteOrigin } from "@/lib/site-url";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  await loadCatalog();
+  const catalog = getCatalog();
   const base = resolveSiteOrigin(siteConfig.domain);
   const lastModified = new Date();
 
@@ -16,7 +19,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: entry.priority,
   }));
 
-  const productRoutes = manufacturingProducts.map((product) => ({
+  const manufacturing = manufacturingProductsFromCatalog(catalog);
+  const productRoutes = manufacturing.map((product) => ({
     url: `${base}${getProductPath(product)}`,
     lastModified,
     changeFrequency: "weekly" as const,
