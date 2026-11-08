@@ -1,10 +1,13 @@
+"use client";
+
 import { ArrowUpRight, Clock, ShieldCheck } from "lucide-react";
-import { Suspense } from "react";
+import { Suspense, useMemo } from "react";
+import { enquiryFormAnchor } from "@/lib/contact-channels";
 import {
-  contactChannels,
-  enquiryFormAnchor,
+  contactChannelsForSite,
   type ContactChannelId,
-} from "@/lib/contact-channels";
+} from "@/lib/storefront/contact-channels";
+import { useStorefront } from "./StorefrontProvider";
 import EnquiryForm from "./EnquiryForm";
 import SectionReveal from "./SectionReveal";
 import styles from "./ContactSection.module.css";
@@ -28,7 +31,7 @@ function ChannelCard({
   id: ContactChannelId;
   title: string;
   description: string;
-  icon: (typeof contactChannels)[number]["icon"];
+  icon: ReturnType<typeof contactChannelsForSite>[number]["icon"];
   primaryHref: string | null;
   ready: boolean;
   primaryLabel: string;
@@ -83,6 +86,12 @@ function ChannelCard({
 }
 
 export default function ContactSection() {
+  const { site } = useStorefront();
+  const contactChannels = useMemo(
+    () => contactChannelsForSite(site.contact),
+    [site.contact]
+  );
+
   return (
     <section
       id="contact"
@@ -119,8 +128,8 @@ export default function ContactSection() {
                 title={channel.title}
                 description={channel.description}
                 icon={channel.icon}
-                ready={channel.isReady()}
-                primaryHref={channel.getPrimaryHref()}
+                ready={channel.ready}
+                primaryHref={channel.primaryHref}
                 primaryLabel={channel.primaryLabel}
                 pendingLabel={channel.pendingLabel}
               />

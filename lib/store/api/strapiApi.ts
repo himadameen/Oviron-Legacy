@@ -3,6 +3,7 @@ import type {
   StrapiCatalogResponse,
   StrapiHomeResponse,
   StrapiProductDetail,
+  StrapiSiteResponse,
   StrapiStatsResponse,
 } from "@/lib/api/strapi-types";
 import { getStrapiBaseUrl } from "@/lib/strapi-server";
@@ -25,7 +26,8 @@ export type CatalogRequest = {
 
 export type ProductRequest = {
   brand?: string;
-  sku: string;
+  sku?: string;
+  product?: string;
 };
 
 export type StatsRequest = {
@@ -41,8 +43,16 @@ export const strapiApi = createApi({
       return headers;
     },
   }),
-  tagTypes: ["Home", "Catalog", "Product", "Stats"],
+  tagTypes: ["Home", "Site", "Catalog", "Product", "Stats"],
   endpoints: (builder) => ({
+    getSite: builder.query<StrapiSiteResponse, { brand?: string } | void>({
+      query: (arg) => ({
+        url: "/api/site",
+        method: "POST",
+        body: { brand: arg?.brand ?? BRAND },
+      }),
+      providesTags: [{ type: "Site", id: "LIST" }],
+    }),
     getHome: builder.query<StrapiHomeResponse, HomeRequest | void>({
       query: (arg) => ({
         url: "/api/home",
@@ -81,11 +91,12 @@ export const strapiApi = createApi({
         method: "POST",
         body: {
           brand: arg.brand ?? BRAND,
-          sku: arg.sku,
+          ...(arg.sku ? { sku: arg.sku } : {}),
+          ...(arg.product ? { product: arg.product } : {}),
         },
       }),
       providesTags: (_result, _err, arg) => [
-        { type: "Product", id: arg.sku },
+        { type: "Product", id: arg.sku ?? arg.product ?? "unknown" },
       ],
     }),
     getStats: builder.query<StrapiStatsResponse, StatsRequest | void>({
@@ -101,6 +112,7 @@ export const strapiApi = createApi({
 
 export const {
   useGetHomeQuery,
+  useGetSiteQuery,
   useGetCatalogQuery,
   useGetProductQuery,
   useGetStatsQuery,

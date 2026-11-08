@@ -9,6 +9,7 @@ import {
   verifiedReviews,
 } from "@/lib/reviews";
 import SectionReveal from "./SectionReveal";
+import { useStorefront } from "./StorefrontProvider";
 import styles from "./BuyerFeedback.module.css";
 
 const AUTO_MS = 5500;
@@ -57,12 +58,27 @@ function StarRating({
 }
 
 export default function BuyerFeedback() {
+  const { marketing } = useStorefront();
+  const cmsItems = marketing.testimonials?.items;
   const [audience, setAudience] = useState<"client" | "customer">("client");
   const [active, setActive] = useState(0);
   const [paused, setPaused] = useState(false);
   const stripRef = useRef<HTMLUListElement>(null);
 
   const entries = useMemo(() => {
+    if (cmsItems?.length) {
+      return cmsItems.map(
+        (item): FeedbackEntry => ({
+          id: item.id,
+          audience: item.audience === "customer" ? "customer" : "client",
+          quote: item.quote,
+          attribution: item.attribution,
+          rating: item.rating ?? 5,
+          tags: item.tags ?? (item.verified ? ["Verified"] : []),
+          verified: Boolean(item.verified),
+        })
+      );
+    }
     if (verifiedReviews.length > 0) {
       return verifiedReviews.map((r) => ({
         id: r.id,
@@ -75,9 +91,11 @@ export default function BuyerFeedback() {
       }));
     }
     return feedbackEntries.filter((e) => e.audience === audience);
-  }, [audience]);
+  }, [audience, cmsItems]);
 
-  const allForAvg = feedbackEntries;
+  const allForAvg = cmsItems?.length
+    ? entries
+    : feedbackEntries;
   const avg = averageRating(allForAvg);
 
   useEffect(() => {

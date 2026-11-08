@@ -1,21 +1,30 @@
 "use client";
 
 import { Grid3X3 } from "lucide-react";
-import { useState } from "react";
-import { galleryItems } from "@/lib/gallery";
+import { useMemo, useState } from "react";
+import { galleryItems as fallbackGallery } from "@/lib/gallery";
+import { mapStorefrontGalleryItems } from "@/lib/storefront/gallery-map";
 import GalleryCollageModal from "./GalleryCollageModal";
 import QuoteButton from "./QuoteButton";
 import SectionIntro from "./SectionIntro";
 import SectionReveal from "./SectionReveal";
 import SafeImage from "./SafeImage";
+import { useStorefront } from "./StorefrontProvider";
 import styles from "./Gallery.module.css";
 
 /** 8 tiles = full 4×2 grid with no gaps */
 const PREVIEW_COUNT = 8;
 
 export default function Gallery() {
+  const { marketing } = useStorefront();
+  const galleryItems = useMemo(() => {
+    const mapped = mapStorefrontGalleryItems(marketing.gallery?.items);
+    return mapped.length ? mapped : fallbackGallery;
+  }, [marketing.gallery?.items]);
+
   const [collageOpen, setCollageOpen] = useState(false);
   const preview = galleryItems.slice(0, PREVIEW_COUNT);
+  const section = marketing.gallery;
 
   return (
     <section
@@ -26,8 +35,8 @@ export default function Gallery() {
       <div className="container">
         <SectionReveal>
           <SectionIntro
-            eyebrow="Gallery"
-            title="Work &amp; footwear in focus."
+            eyebrow={section?.sectionTitle ?? "Gallery"}
+            title={section?.sectionSubtitle ?? "Work & footwear in focus."}
             align="center"
             titleId="gallery-heading"
           />

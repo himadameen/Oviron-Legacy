@@ -1,8 +1,14 @@
-import { normalizedCatalogFromStrapiCatalog, normalizedCatalogFromStrapiHome } from "@/lib/api/normalize-catalog-response";
+import {
+  normalizedCatalogFromStrapiCatalog,
+  normalizedCatalogFromStrapiHome,
+  normalizedCatalogFromStrapiNestedCatalog,
+} from "@/lib/api/normalize-catalog-response";
 import type {
   StrapiCatalogResponse,
   StrapiHomeResponse,
+  StrapiNestedCatalogResponse,
   StrapiProductDetail,
+  StrapiSiteResponse,
 } from "@/lib/api/strapi-types";
 import { normalizeCatalog } from "@/lib/catalog/normalize";
 import type {
@@ -137,12 +143,27 @@ async function strapiPost<T>(path: string, body: Record<string, unknown>): Promi
   }
 }
 
-export async function fetchStrapiHome(): Promise<StrapiHomeResponse | null> {
+export async function fetchStrapiHome(options?: {
+  page?: number;
+  pageSize?: number;
+}): Promise<StrapiHomeResponse | null> {
   return strapiPost<StrapiHomeResponse>("/api/home", {
     brand: BRAND,
-    page: 1,
-    pageSize: 8,
+    page: options?.page ?? 1,
+    pageSize: options?.pageSize ?? 8,
   });
+}
+
+export async function fetchStrapiSite(): Promise<StrapiSiteResponse | null> {
+  return strapiPost<StrapiSiteResponse>("/api/site", { brand: BRAND });
+}
+
+function isNestedCatalogResponse(
+  value: unknown
+): value is StrapiNestedCatalogResponse {
+  if (!value || typeof value !== "object") return false;
+  const record = value as Record<string, unknown>;
+  return Array.isArray(record.categories) && !("category" in record);
 }
 
 export async function fetchStrapiCatalog(body: {
@@ -150,7 +171,7 @@ export async function fetchStrapiCatalog(body: {
   page?: number;
   pageSize?: number;
   subCategory?: string;
-}): Promise<StrapiCatalogResponse | null> {
+}): Promise<StrapiCatalogResponse | StrapiNestedCatalogResponse | null> {
   const payload: Record<string, unknown> = {
     brand: BRAND,
     category: body.category,
@@ -159,7 +180,10 @@ export async function fetchStrapiCatalog(body: {
   if (body.pageSize != null) payload.pageSize = body.pageSize;
   if (body.subCategory) payload.subCategory = body.subCategory;
 
-  return strapiPost<StrapiCatalogResponse>("/api/catalog", payload);
+  return strapiPost<StrapiCatalogResponse | StrapiNestedCatalogResponse>(
+    "/api/catalog",
+    payload
+  );
 }
 
 export async function fetchStrapiProductBySku(
@@ -168,6 +192,15 @@ export async function fetchStrapiProductBySku(
   return strapiPost<StrapiProductDetail>("/api/product", {
     brand: BRAND,
     sku,
+  });
+}
+
+export async function fetchStrapiProductById(
+  productId: string
+): Promise<StrapiProductDetail | null> {
+  return strapiPost<StrapiProductDetail>("/api/product", {
+    brand: BRAND,
+    product: productId,
   });
 }
 
@@ -192,7 +225,9 @@ export async function fetchMergedCatalogFromStrapi(): Promise<NormalizedCatalog 
       pageSize: 500,
     });
     if (!res) continue;
-    const partial = normalizedCatalogFromStrapiCatalog(res);
+    const partial = isNestedCatalogResponse(res)
+      ? normalizedCatalogFromStrapiNestedCatalog(res)
+      : normalizedCatalogFromStrapiCatalog(res);
     merged = merged ? mergeTwoNormalizedCatalogs(merged, partial) : partial;
   }
 

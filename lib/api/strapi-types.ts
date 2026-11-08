@@ -4,6 +4,19 @@
  */
 
 import type { CatalogApiProductSpecs } from "@/lib/catalog/types";
+import type {
+  StorefrontMarketing,
+  StorefrontNestedCatalogResponse,
+  StorefrontSiteResponse,
+} from "./storefront-types";
+
+export type {
+  StorefrontMarketing,
+  StorefrontSiteResponse,
+  StorefrontNestedCatalogResponse,
+};
+export type StrapiSiteResponse = StorefrontSiteResponse;
+export type StrapiNestedCatalogResponse = StorefrontNestedCatalogResponse;
 
 export type StrapiBrand = {
   slug: string;
@@ -60,6 +73,7 @@ export type StrapiHomeResponse = {
   categories: StrapiCategory[];
   products: StrapiListProduct[];
   pagination?: StrapiPagination;
+  marketing?: StorefrontMarketing;
 };
 
 export type StrapiCatalogResponse = {

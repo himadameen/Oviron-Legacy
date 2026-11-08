@@ -6,24 +6,37 @@ import { brandLogo, imagePlaceholders } from "@/lib/images";
 import SafeImage from "./SafeImage";
 import styles from "./HeroVisual.module.css";
 
-const SLIDES = [
-  {
-    src: imagePlaceholders.hero,
-    alt: "Leather footwear sourcing showcase placeholder",
-  },
-  {
-    src: imagePlaceholders.collection,
-    alt: "Leather collection placeholder",
-  },
-  {
-    src: imagePlaceholders.editorial,
-    alt: "Editorial footwear placeholder",
-  },
-] as const;
+const DEFAULT_SLIDE_MS = 5000;
 
-const SLIDE_MS = 5000;
+type HeroVisualProps = {
+  slides?: { src: string; alt: string }[];
+  slideIntervalMs?: number;
+  stampLogoSrc?: string;
+};
 
-export default function HeroVisual() {
+export default function HeroVisual({
+  slides: slidesProp,
+  slideIntervalMs,
+  stampLogoSrc,
+}: HeroVisualProps) {
+  const SLIDES =
+    slidesProp && slidesProp.length > 0
+      ? slidesProp
+      : [
+          {
+            src: imagePlaceholders.hero,
+            alt: "Leather footwear sourcing showcase placeholder",
+          },
+          {
+            src: imagePlaceholders.collection,
+            alt: "Leather collection placeholder",
+          },
+          {
+            src: imagePlaceholders.editorial,
+            alt: "Editorial footwear placeholder",
+          },
+        ];
+  const SLIDE_MS = slideIntervalMs ?? DEFAULT_SLIDE_MS;
   const ref = useRef<HTMLDivElement>(null);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
   const [slide, setSlide] = useState(0);
@@ -37,7 +50,7 @@ export default function HeroVisual() {
     }, SLIDE_MS);
 
     return () => clearInterval(timer);
-  }, []);
+  }, [SLIDE_MS, SLIDES.length]);
 
   useEffect(() => {
     const node = ref.current;
@@ -124,7 +137,7 @@ export default function HeroVisual() {
         </div>
         <div className={styles.stamp} aria-hidden>
           <Image
-            src={brandLogo.icon}
+            src={stampLogoSrc || brandLogo.icon}
             alt=""
             width={44}
             height={44}

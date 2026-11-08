@@ -1,20 +1,30 @@
+"use client";
+
 import { Info } from "lucide-react";
 import QuoteButton from "./QuoteButton";
 import SectionIntro from "./SectionIntro";
 import SectionReveal from "./SectionReveal";
+import { useStorefront } from "./StorefrontProvider";
 import styles from "./QualityGrades.module.css";
 
-const grades = ["A+", "A", "B+", "B", "C+", "C"];
-
 export default function QualityGrades() {
+  const { marketing } = useStorefront();
+  const block = marketing.qualityGrades;
+  const grades = [...(block?.grades ?? [])]
+    .sort((a, b) => (a.sortOrder ?? 999) - (b.sortOrder ?? 999))
+    .map((g) => g.label);
+
   return (
     <section className={`section ${styles.section}`} aria-labelledby="grades-heading">
       <div className="container">
         <SectionReveal>
           <SectionIntro
-            eyebrow="Grades"
-            title="Options for different needs."
-            lead="Internal supplier labels — agreed per product before order."
+            eyebrow={block?.eyebrow ?? "Grades"}
+            title={block?.title ?? "Options for different needs."}
+            lead={
+              block?.lead ??
+              "Internal supplier labels — agreed per product before order."
+            }
             align="center"
           />
           <h2 id="grades-heading" className="sr-only">
@@ -34,7 +44,8 @@ export default function QualityGrades() {
 
         <p className={styles.disclaimer}>
           <Info size={16} strokeWidth={1.5} aria-hidden />
-          Labels vary by supplier — condition and tolerances confirmed per SKU.
+          {block?.disclaimer ??
+            "Labels vary by supplier — condition and tolerances confirmed per SKU."}
         </p>
 
         <div className={styles.ctaWrap}>

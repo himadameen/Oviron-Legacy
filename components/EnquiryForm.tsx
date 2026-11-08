@@ -12,7 +12,9 @@ import {
 import { formatEnquiryCategoryValue } from "@/lib/catalog";
 import { useCatalogContext } from "@/lib/catalog-context";
 import { getProductBySeoSlug } from "@/lib/product-catalog";
-import { isContactConfigured, siteConfig } from "@/lib/site-config";
+import { contactConfigured } from "@/lib/contact";
+import { siteConfig } from "@/lib/site-config";
+import { useStorefront } from "./StorefrontProvider";
 import styles from "./EnquiryForm.module.css";
 
 type Channel = "whatsapp" | "email" | "linkedin";
@@ -46,6 +48,8 @@ const initialState: FormState = {
 const gradeOptions = ["", "A+", "A", "B+", "B", "C+", "C"];
 
 export default function EnquiryForm() {
+  const { site } = useStorefront();
+  const contact = site.contact ?? {};
   const searchParams = useSearchParams();
   const [form, setForm] = useState<FormState>(initialState);
   const [errors, setErrors] = useState<Partial<Record<keyof FormState, string>>>(
@@ -112,11 +116,11 @@ export default function EnquiryForm() {
     if (channel !== "linkedin" && !validate()) return;
 
     if (channel === "linkedin") {
-      if (!isContactConfigured("linkedin")) {
-        setNotice("Configure NEXT_PUBLIC_LINKEDIN_URL to open LinkedIn.");
+      if (!contactConfigured("linkedin", contact)) {
+        setNotice("Configure LinkedIn URL in Strapi or NEXT_PUBLIC_LINKEDIN_URL.");
         return;
       }
-      window.open(siteConfig.linkedInUrl, "_blank", "noopener,noreferrer");
+      window.open(contact.linkedInUrl!, "_blank", "noopener,noreferrer");
       return;
     }
 
@@ -124,11 +128,11 @@ export default function EnquiryForm() {
     const subject = "OVIRON — Quote Request";
 
     if (channel === "whatsapp") {
-      if (!isContactConfigured("whatsapp")) {
-        setNotice("Configure NEXT_PUBLIC_WHATSAPP_NUMBER or use email.");
+      if (!contactConfigured("whatsapp", contact)) {
+        setNotice("Configure WhatsApp in Strapi or NEXT_PUBLIC_WHATSAPP_NUMBER.");
         return;
       }
-      const url = buildWhatsAppUrl(message);
+      const url = buildWhatsAppUrl(message, contact.whatsappNumber);
       if (url) {
         window.open(url, "_blank", "noopener,noreferrer");
         setNotice("Prepared in WhatsApp — review and send when ready.");
@@ -136,11 +140,11 @@ export default function EnquiryForm() {
       return;
     }
 
-    if (!isContactConfigured("email")) {
-      setNotice("Configure NEXT_PUBLIC_BUSINESS_EMAIL to draft email.");
+    if (!contactConfigured("email", contact)) {
+      setNotice("Configure business email in Strapi or NEXT_PUBLIC_BUSINESS_EMAIL.");
       return;
     }
-    const mailto = buildMailtoUrl(subject, message);
+    const mailto = buildMailtoUrl(subject, message, contact.businessEmail);
     if (mailto) window.location.href = mailto;
   };
 

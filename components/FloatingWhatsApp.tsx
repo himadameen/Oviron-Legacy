@@ -1,16 +1,19 @@
 "use client";
 
 import { MessageCircle } from "lucide-react";
-import { buildWhatsAppUrl } from "@/lib/contact";
-import { isContactConfigured } from "@/lib/site-config";
+import { buildWhatsAppUrl, contactConfigured } from "@/lib/contact";
+import { useStorefront } from "./StorefrontProvider";
 import styles from "./FloatingWhatsApp.module.css";
 
 export default function FloatingWhatsApp() {
-  const ready = isContactConfigured("whatsapp");
+  const { site } = useStorefront();
+  const contact = site.contact ?? {};
+  const ready = contactConfigured("whatsapp", contact);
   const href =
     (ready &&
       buildWhatsAppUrl(
-        "Hello Oviron — I would like to connect with your team for a footwear quote."
+        "Hello Oviron — I would like to connect with your team for a footwear quote.",
+        contact.whatsappNumber
       )) ||
     "#contact";
 

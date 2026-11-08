@@ -39,18 +39,36 @@ export function formatEnquiryMessage(
   return lines.join("\n");
 }
 
-export function buildWhatsAppUrl(message: string): string | null {
-  const digits = siteConfig.whatsappNumber.replace(/\D/g, "");
+export function buildWhatsAppUrl(
+  message: string,
+  whatsappNumber: string = siteConfig.whatsappNumber
+): string | null {
+  const digits = whatsappNumber.replace(/\D/g, "");
   if (!digits) return null;
   return `https://wa.me/${digits}?text=${encodeURIComponent(message)}`;
 }
 
 export function buildMailtoUrl(
   subject: string,
-  body: string
+  body: string,
+  businessEmail: string = siteConfig.businessEmail
 ): string | null {
-  if (!siteConfig.businessEmail) return null;
-  return `mailto:${siteConfig.businessEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  if (!businessEmail) return null;
+  return `mailto:${businessEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+}
+
+export function contactConfigured(
+  channel: "whatsapp" | "email" | "linkedin",
+  contact: {
+    whatsappNumber?: string;
+    businessEmail?: string;
+    linkedInUrl?: string;
+  } = siteConfig
+): boolean {
+  if (channel === "whatsapp") return Boolean(contact.whatsappNumber?.replace(/\D/g, ""));
+  if (channel === "email") return Boolean(contact.businessEmail?.trim());
+  if (channel === "linkedin") return Boolean(contact.linkedInUrl?.trim());
+  return false;
 }
 
 export function categoryWhatsAppMessage(category: string): string {

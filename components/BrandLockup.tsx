@@ -1,5 +1,7 @@
+"use client";
+
 import Link from "next/link";
-import { siteConfig } from "@/lib/site-config";
+import { useStorefront } from "./StorefrontProvider";
 import styles from "./BrandLockup.module.css";
 
 type BrandLockupProps = {
@@ -14,10 +16,15 @@ export default function BrandLockup({
   asLink = true,
   onNavigate,
 }: BrandLockupProps) {
+  const { site } = useStorefront();
+  const brand = site.brand;
+
   const content = (
     <>
-      <span className={styles.wordmark}>{siteConfig.name}</span>
-      <span className={styles.tagline}>{siteConfig.logoTagline}</span>
+      <span className={styles.wordmark}>{brand?.name ?? "Oviron"}</span>
+      <span className={styles.tagline}>
+        {brand?.logoTagline ?? "Global Trade, Import, Export"}
+      </span>
     </>
   );
 

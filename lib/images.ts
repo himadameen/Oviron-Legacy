@@ -40,7 +40,7 @@ function pick(local: string, remoteUrl: string): string {
 export const siteImages = {
   hero: pick(imagePlaceholders.hero, remote.hero),
   approach: pick(imagePlaceholders.editorial, remote.approach),
-  privateLabel: pick(imagePlaceholders.editorial, remote.privateLabel),
+  privateLabel: pick(imagePlaceholders.collection, remote.privateLabel),
   texture: pick(imagePlaceholders.collection, remote.formal),
 } as const;
 

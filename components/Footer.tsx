@@ -1,16 +1,23 @@
+"use client";
+
 import { Linkedin, Mail, MessageCircle } from "lucide-react";
 import Link from "next/link";
-import { buildWhatsAppUrl } from "@/lib/contact";
-import { isContactConfigured, siteConfig } from "@/lib/site-config";
+import { buildWhatsAppUrl, contactConfigured } from "@/lib/contact";
 import { footerNav } from "@/lib/routes";
 import BrandLockup from "./BrandLockup";
+import { useStorefront } from "./StorefrontProvider";
 import styles from "./Footer.module.css";
 
 export default function Footer() {
+  const { marketing, site } = useStorefront();
+  const contact = site.contact ?? {};
   const year = new Date().getFullYear();
-  const whatsappHref = isContactConfigured("whatsapp")
-    ? buildWhatsAppUrl("Hello Oviron — footwear sourcing enquiry.")
-    : null;
+  const whatsappHref = contactConfigured("whatsapp", contact)
+    ? buildWhatsAppUrl(
+        "Hello Oviron — footwear sourcing enquiry.",
+        contact.whatsappNumber
+      )
+  : null;
 
   return (
     <footer className={styles.footer}>
@@ -20,7 +27,8 @@ export default function Footer() {
             <BrandLockup variant="footer" />
           </div>
           <p className={styles.blurb}>
-            Leather footwear sourcing, wholesale &amp; private-label enquiries.
+            {marketing.footerBlurb ??
+              "Leather footwear sourcing, wholesale & private-label enquiries."}
           </p>
         </div>
 
@@ -50,9 +58,9 @@ export default function Footer() {
               )}
             </li>
             <li>
-              {isContactConfigured("email") ? (
-                <a href={`mailto:${siteConfig.businessEmail}`}>
-                  <Mail size={16} /> {siteConfig.businessEmail}
+              {contactConfigured("email", contact) ? (
+                <a href={`mailto:${contact.businessEmail}`}>
+                  <Mail size={16} /> {contact.businessEmail}
                 </a>
               ) : (
                 <span className={styles.placeholder}>
@@ -61,9 +69,9 @@ export default function Footer() {
               )}
             </li>
             <li>
-              {isContactConfigured("linkedin") ? (
+              {contactConfigured("linkedin", contact) ? (
                 <a
-                  href={siteConfig.linkedInUrl}
+                  href={contact.linkedInUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -82,7 +90,7 @@ export default function Footer() {
       <div className={styles.bottom}>
         <div className="container">
           <p className={styles.copy}>
-            © {year} {siteConfig.name}. All rights reserved.
+            © {year} {site.brand?.name ?? "Oviron"}. All rights reserved.
           </p>
           <p className={styles.disclaimer}>
             Product availability, specifications, internal grades, MOQ, pricing,

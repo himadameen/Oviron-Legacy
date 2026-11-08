@@ -1,23 +1,32 @@
 "use client";
 
 import { Mail, MessageCircle } from "lucide-react";
-import { buildMailtoUrl, buildWhatsAppUrl } from "@/lib/contact";
-import { isContactConfigured, siteConfig } from "@/lib/site-config";
+import { buildMailtoUrl, buildWhatsAppUrl, contactConfigured } from "@/lib/contact";
 import SectionReveal from "./SectionReveal";
+import { useStorefront } from "./StorefrontProvider";
 import styles from "./FinalCTA.module.css";
 
 export default function FinalCTA() {
+  const { site } = useStorefront();
+  const contact = site.contact ?? {};
   const whatsappHref =
-    (isContactConfigured("whatsapp") &&
-      buildWhatsAppUrl("Hello Oviron — quote request for footwear sourcing.")) ||
+    (contactConfigured("whatsapp", contact) &&
+      buildWhatsAppUrl(
+        "Hello Oviron — quote request for footwear sourcing.",
+        contact.whatsappNumber
+      )) ||
     "#contact";
 
-  const mailHref = isContactConfigured("email")
-    ? buildMailtoUrl("OVIRON — Quote", "Hello Oviron,\n\nI would like a footwear sourcing quote.\n")
+  const mailHref = contactConfigured("email", contact)
+    ? buildMailtoUrl(
+        "OVIRON — Quote",
+        "Hello Oviron,\n\nI would like a footwear sourcing quote.\n",
+        contact.businessEmail
+      )
     : "#contact";
 
-  const linkedInHref = isContactConfigured("linkedin")
-    ? siteConfig.linkedInUrl
+  const linkedInHref = contactConfigured("linkedin", contact)
+    ? (contact.linkedInUrl ?? "#contact")
     : "#contact";
 
   return (

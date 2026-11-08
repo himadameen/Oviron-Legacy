@@ -7,7 +7,9 @@ export type ProductTagKey =
   | "fast_moving"
   | "most_likable"
   | "most_sale"
-  | "trending";
+  | "trending"
+  | "hot_sale"
+  | "sold";
 
 export type ProductTagChip = {
   key: ProductTagKey;
@@ -17,9 +19,11 @@ export type ProductTagChip = {
 const PRIORITY: ProductTagKey[] = [
   "recommended",
   "fast_moving",
+  "hot_sale",
   "most_likable",
   "most_sale",
   "trending",
+  "sold",
 ];
 
 const LABELS: Record<ProductTagKey, string> = {
@@ -28,6 +32,8 @@ const LABELS: Record<ProductTagKey, string> = {
   most_likable: "Most likable",
   most_sale: "Most sale",
   trending: "Trending",
+  hot_sale: "Hot sale",
+  sold: "Sold",
 };
 
 /** Map normalized slug → canonical key (typos & aliases). */
@@ -44,9 +50,12 @@ const ALIAS_TO_KEY: Record<string, ProductTagKey> = {
   most_sale: "most_sale",
   mostsale: "most_sale",
   sale: "most_sale",
-  sold: "most_sale",
+  sold_out: "most_sale",
   trending: "trending",
   trend: "trending",
+  hot_sale: "hot_sale",
+  hotsale: "hot_sale",
+  sold: "sold",
 };
 
 function slugifyTag(raw: string): string {

@@ -1,5 +1,9 @@
 import { catalogProductFromStrapiProductDetail } from "@/lib/api/strapi-product-detail";
-import { fetchStrapiHome, fetchStrapiProductBySku } from "@/lib/strapi-server";
+import {
+  fetchStrapiHome,
+  fetchStrapiProductById,
+  fetchStrapiProductBySku,
+} from "@/lib/strapi-server";
 import { getCatalog, upsertProductInCatalogCache } from "@/lib/catalog";
 import {
   manufacturingProductsFromCatalog,
@@ -23,16 +27,19 @@ export async function getManufacturingProductForPageSlug(
   const home = await fetchStrapiHome();
   if (!home?.products?.length) return null;
 
-  const skuForSlug = home.products
+  const productForSlug = home.products
     .map((p) => ({
+      id: p.id,
       sku: p.sku,
       slug: buildProductSeoSlug({ skuRef: p.sku, name: p.name }),
     }))
-    .find((row) => row.slug === normalized)?.sku;
+    .find((row) => row.slug === normalized);
 
-  if (!skuForSlug) return null;
+  if (!productForSlug) return null;
 
-  const detail = await fetchStrapiProductBySku(skuForSlug);
+  const detail =
+    (await fetchStrapiProductBySku(productForSlug.sku)) ??
+    (await fetchStrapiProductById(productForSlug.id));
   if (!detail) return null;
 
   const row = catalogProductFromStrapiProductDetail(detail);

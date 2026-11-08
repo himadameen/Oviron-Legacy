@@ -1,10 +1,11 @@
 "use client";
 
 import { ChevronDown, MessageCircle, Shield, Truck } from "lucide-react";
-import { useId, useState } from "react";
-import { faqItems } from "@/lib/faq";
+import { useId, useMemo, useState } from "react";
+import { faqItems as fallbackFaq } from "@/lib/faq";
 import QuoteButton from "./QuoteButton";
 import SectionReveal from "./SectionReveal";
+import { useStorefront } from "./StorefrontProvider";
 import styles from "./FAQ.module.css";
 
 const topics = [
@@ -14,6 +15,17 @@ const topics = [
 ];
 
 export default function FAQ() {
+  const { marketing } = useStorefront();
+  const faqItems = useMemo(() => {
+    const items = marketing.faq?.items;
+    if (items?.length) {
+      return [...items].sort(
+        (a, b) => (a.sortOrder ?? 999) - (b.sortOrder ?? 999)
+      );
+    }
+    return fallbackFaq;
+  }, [marketing.faq?.items]);
+
   const baseId = useId();
   const [openId, setOpenId] = useState<string | null>(faqItems[0]?.id ?? null);
 

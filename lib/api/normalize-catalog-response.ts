@@ -5,6 +5,7 @@ import type {
   StrapiCategory,
   StrapiHomeResponse,
   StrapiListProduct,
+  StrapiNestedCatalogResponse,
   StrapiSubcategory,
 } from "./strapi-types";
 
@@ -154,4 +155,26 @@ export function normalizedCatalogFromStrapiHome(
   home: StrapiHomeResponse
 ): NormalizedCatalog {
   return normalizeCatalog(catalogApiResponseFromHome(home));
+}
+
+/** Nested tree: POST /api/catalog without pagination (`categories[].subcategories[].products`). */
+export function normalizedCatalogFromStrapiNestedCatalog(
+  res: StrapiNestedCatalogResponse
+): NormalizedCatalog {
+  const payload: CatalogApiResponse = {
+    categories: (res.categories ?? []).map((main) => ({
+      id: main.id,
+      label: main.label,
+      subtitle: main.subtitle,
+      sortOrder: main.sortOrder,
+      subcategories: (main.subcategories ?? []).map((sub) => ({
+        id: sub.id,
+        label: sub.label,
+        description: sub.description,
+        sortOrder: sub.sortOrder,
+        products: sub.products ?? [],
+      })),
+    })),
+  };
+  return normalizeCatalog(payload);
 }

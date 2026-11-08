@@ -3,14 +3,24 @@
 import { Play } from "lucide-react";
 import { useRef, useState } from "react";
 import { siteImages } from "@/lib/images";
-import { siteMedia } from "@/lib/site-config";
+import { mediaUrl } from "@/lib/storefront/media";
 import SafeImage from "./SafeImage";
+import { useStorefront } from "./StorefrontProvider";
 import styles from "./MediaBanner.module.css";
 
 export default function MediaBanner() {
+  const { marketing } = useStorefront();
+  const banner = marketing.campaignBanner;
+  if (banner?.enabled === false) return null;
+
   const videoRef = useRef<HTMLVideoElement>(null);
   const [playing, setPlaying] = useState(false);
-  const hasVideo = Boolean(siteMedia.bannerVideoUrl);
+  const videoUrl = banner?.video?.url?.trim() ?? "";
+  const posterUrl =
+    mediaUrl(banner?.video?.poster) ||
+    mediaUrl(banner?.fallbackImage) ||
+    siteImages.hero;
+  const hasVideo = Boolean(videoUrl);
 
   const togglePlay = () => {
     const el = videoRef.current;
@@ -25,14 +35,17 @@ export default function MediaBanner() {
   };
 
   return (
-    <section className={styles.section} aria-label="Campaign banner">
+    <section
+      className={styles.section}
+      aria-label={banner?.ariaLabel ?? "Campaign banner"}
+    >
       <div className={styles.banner}>
         {hasVideo ? (
           <>
             <video
               ref={videoRef}
               className={styles.video}
-              poster={siteMedia.bannerPoster || siteImages.hero}
+              poster={posterUrl}
               muted
               loop
               playsInline
@@ -40,7 +53,7 @@ export default function MediaBanner() {
               onPlay={() => setPlaying(true)}
               onPause={() => setPlaying(false)}
             >
-              <source src={siteMedia.bannerVideoUrl} type="video/mp4" />
+              <source src={videoUrl} type={banner?.video?.mime ?? "video/mp4"} />
             </video>
             <button
               type="button"
@@ -55,8 +68,11 @@ export default function MediaBanner() {
         ) : (
           <div className={styles.posterWrap}>
             <SafeImage
-              src={siteMedia.bannerPoster || siteImages.hero}
-              alt="Campaign banner — add your professional shoot video or poster"
+              src={posterUrl}
+              alt={
+                banner?.fallbackImage?.alt ??
+                "Campaign banner — add your professional shoot video or poster"
+              }
               fill
               fallbackKind="editorial"
               className={styles.poster}
@@ -65,11 +81,13 @@ export default function MediaBanner() {
           </div>
         )}
         <div className={styles.overlay}>
-          <p className={styles.eyebrow}>Campaign · Studio shoot</p>
-          <p className={styles.title}>Replace with your professional footage</p>
-          <p className={styles.hint}>
-            Set <code>NEXT_PUBLIC_BANNER_VIDEO_URL</code> for full-width video
-          </p>
+          {banner?.eyebrow ? (
+            <p className={styles.eyebrow}>{banner.eyebrow}</p>
+          ) : null}
+          {banner?.title ? (
+            <p className={styles.title}>{banner.title}</p>
+          ) : null}
+          {banner?.hint ? <p className={styles.hint}>{banner.hint}</p> : null}
         </div>
       </div>
     </section>
