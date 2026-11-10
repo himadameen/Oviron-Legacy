@@ -1,0 +1,6 @@
+.logoFallback {
+  object-fit: contain !important;
+  padding: clamp(1.25rem, 18%, 3rem);
+  background: var(--champagne);
+  box-sizing: border-box;
+}

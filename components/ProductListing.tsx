@@ -74,7 +74,9 @@ function LazyProductList({
     <>
       <ul className={styles.list} aria-label={blockLabel}>
         {visible.map((product, index) => (
-          <li key={product.id}>
+          <li
+            key={`${product.mainCategoryId}-${product.subCategoryId}-${product.sku}`}
+          >
             <ProductManufacturingCard
               product={product}
               index={index}
@@ -295,7 +297,7 @@ export default function ProductListing() {
 
           {groupedBlocks.map((block) => (
             <div
-              key={`${block.mainLabel}-${block.subLabel}`}
+              key={`${block.mainId}-${block.subId}`}
               id={`catalog-${block.mainId}-${block.subId}`}
               className={styles.group}
             >
@@ -314,7 +316,7 @@ export default function ProductListing() {
               </header>
               <LazyProductList
                 items={block.items}
-                paginationKey={`${activeMain}-${block.mainLabel}-${block.subLabel}`}
+                paginationKey={`${activeMain}-${block.mainId}-${block.subId}`}
                 blockLabel={`${block.mainLabel} · ${block.subLabel}`}
               />
             </div>

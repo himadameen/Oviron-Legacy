@@ -1,5 +1,11 @@
 import type { CatalogProduct } from "./catalog";
-import { collectionImages, imagePlaceholders, siteImages } from "./images";
+import {
+  brandLogo,
+  collectionImages,
+  imagePlaceholders,
+  isMissingProductImage,
+  siteImages,
+} from "./images";
 import type { ProductTagChip } from "./product-tags";
 import { buildProductSeoSlug } from "./product-slugs";
 import type { NormalizedCatalog } from "./catalog/types";
@@ -28,8 +34,9 @@ function galleryForProduct(
   item: CatalogProduct,
   peers: CatalogProduct[]
 ): string[] {
-  if (item.gallery.length > 1) {
-    return item.gallery.slice(0, 8);
+  const primary = item.gallery.filter((u) => !isMissingProductImage(u));
+  if (primary.length > 1) {
+    return primary.slice(0, 8);
   }
 
   const groupPeers = peers
@@ -39,28 +46,23 @@ function galleryForProduct(
         c.subCategoryId === item.subCategoryId &&
         c.id !== item.id
     )
-    .map((c) => c.image);
+    .map((c) => c.image)
+    .filter((u) => !isMissingProductImage(u));
 
   const pool = [
-    item.image,
+    ...primary,
     ...groupPeers,
-    imagePlaceholders.collection,
-    imagePlaceholders.hero,
-    imagePlaceholders.editorial,
-    siteImages.approach,
-    siteImages.texture,
-    siteImages.hero,
-    ...Object.values(collectionImages),
+    ...Object.values(collectionImages).filter((u) => !isMissingProductImage(u)),
   ];
 
   const unique: string[] = [];
   for (const src of pool) {
-    if (!src || unique.includes(src)) continue;
+    if (!src || isMissingProductImage(src) || unique.includes(src)) continue;
     unique.push(src);
     if (unique.length >= 4) break;
   }
 
-  return unique.length > 0 ? unique : [item.image];
+  return unique.length > 0 ? unique : [brandLogo.icon];
 }
 
 function toManufacturingProduct(

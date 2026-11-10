@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useMemo } from "react";
 import { Globe2, Sparkles } from "lucide-react";
 import QuoteButton from "./QuoteButton";
 import HeroVisual from "./HeroVisual";
@@ -9,8 +10,31 @@ import { mediaUrl } from "@/lib/storefront/media";
 import styles from "./Hero.module.css";
 
 export default function Hero() {
-  const { marketing, site } = useStorefront();
+  const { marketing, site, sources } = useStorefront();
   const hero = marketing.hero;
+
+  const heroSlides = useMemo(
+    () =>
+      hero?.slides
+        ?.map((slide) => ({
+          src: mediaUrl(slide.image),
+          alt: slide.image?.alt ?? "",
+        }))
+        .filter((s) => s.src) ?? [],
+    [hero?.slides]
+  );
+
+  useEffect(() => {
+    if (process.env.NODE_ENV !== "development") return;
+    console.log("[Hero] marketing source:", sources.marketing);
+    console.log("[Hero] raw marketing.hero.slides:", hero?.slides);
+    console.log("[Hero] slides sent to HeroVisual:", heroSlides);
+    if ((hero?.slides?.length ?? 0) > 0 && heroSlides.length === 0) {
+      console.warn(
+        "[Hero] Strapi returned slides but all image URLs were empty after mediaUrl() — check image.url shape."
+      );
+    }
+  }, [hero?.slides, heroSlides, sources.marketing]);
 
   return (
     <section className={styles.hero} aria-labelledby="hero-heading">
@@ -19,14 +43,7 @@ export default function Hero() {
         <SectionReveal className={styles.visualWrap}>
           <div className={styles.showcase}>
             <HeroVisual
-              slides={
-                hero?.slides
-                  ?.map((slide) => ({
-                    src: mediaUrl(slide.image),
-                    alt: slide.image?.alt ?? "",
-                  }))
-                  .filter((s) => s.src) ?? undefined
-              }
+              slides={heroSlides.length > 0 ? heroSlides : undefined}
               slideIntervalMs={hero?.slideIntervalMs}
               stampLogoSrc={mediaUrl(site.assets?.logoIcon) || undefined}
             />

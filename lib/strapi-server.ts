@@ -129,12 +129,15 @@ function mergeTwoNormalizedCatalogs(
 
 async function strapiPost<T>(path: string, body: Record<string, unknown>): Promise<T | null> {
   const base = getStrapiBaseUrl();
+  const isDev = process.env.NODE_ENV === "development";
   try {
     const res = await fetch(`${base}${path}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
-      next: { revalidate: 120 },
+      ...(isDev
+        ? { cache: "no-store" as const }
+        : { next: { revalidate: 120 } }),
     });
     if (!res.ok) return null;
     return (await res.json()) as T;

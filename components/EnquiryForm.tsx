@@ -248,24 +248,32 @@ export default function EnquiryForm() {
               className={errors.footwearCategory ? styles.err : undefined}
             >
               <option value="">Select</option>
-              {catalog.mainCategories.map((main) => (
-                <optgroup key={main.id} label={main.label}>
-                  {main.subcategories.flatMap((sub) =>
-                    sub.products.map((product) => {
-                      const value = formatEnquiryCategoryValue({
-                        mainCategoryLabel: main.label,
-                        subCategoryLabel: sub.label,
-                        name: product.name,
-                      });
-                      return (
-                        <option key={product.id} value={value}>
-                          {sub.label} — {product.name}
-                        </option>
-                      );
-                    })
-                  )}
-                </optgroup>
-              ))}
+              {catalog.mainCategories.map((main) => {
+                const seenValues = new Set<string>();
+                return (
+                  <optgroup key={main.id} label={main.label}>
+                    {main.subcategories.flatMap((sub, subIndex) =>
+                      sub.products.map((product) => {
+                        const value = formatEnquiryCategoryValue({
+                          mainCategoryLabel: main.label,
+                          subCategoryLabel: sub.label,
+                          name: product.name,
+                        });
+                        if (seenValues.has(value)) return [];
+                        seenValues.add(value);
+                        return (
+                          <option
+                            key={`${main.id}-${subIndex}-${sub.id}-${product.sku}`}
+                            value={value}
+                          >
+                            {sub.label} — {product.name}
+                          </option>
+                        );
+                      })
+                    )}
+                  </optgroup>
+                );
+              })}
             </select>
             {errors.footwearCategory && (
               <span className={styles.error}>{errors.footwearCategory}</span>

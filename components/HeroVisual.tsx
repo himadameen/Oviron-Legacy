@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { brandLogo, imagePlaceholders } from "@/lib/images";
 import SafeImage from "./SafeImage";
@@ -96,7 +95,7 @@ export default function HeroVisual({
         >
           {SLIDES.map((item, index) => (
             <div
-              key={item.src}
+              key={`hero-slide-${index}`}
               className={
                 index === slide ? styles.slideActive : styles.slide
               }
@@ -136,7 +135,7 @@ export default function HeroVisual({
           </div>
         </div>
         <div className={styles.stamp} aria-hidden>
-          <Image
+          <SafeImage
             src={stampLogoSrc || brandLogo.icon}
             alt=""
             width={44}

@@ -59,6 +59,7 @@ export default function CollectionGrid() {
   const blocks = useMemo(() => {
     if (!activeCategory) return [];
     return activeCategory.subcategories.map((sub) => ({
+      subId: sub.id,
       subLabel: sub.label,
       subDescription: sub.description,
       products: sub.products,
@@ -132,8 +133,11 @@ export default function CollectionGrid() {
         </div>
 
         <div className={styles.blocks}>
-          {blocks.map((block) => (
-            <div key={block.subLabel} className={styles.groupBlock}>
+          {blocks.map((block, blockIndex) => (
+            <div
+              key={`${activeMain}-${block.subId}-${blockIndex}`}
+              className={styles.groupBlock}
+            >
               <header className={styles.groupHead}>
                 <h3>{block.subLabel}</h3>
                 {block.subDescription ? (
@@ -142,7 +146,9 @@ export default function CollectionGrid() {
               </header>
               <ul className={styles.grid}>
                 {block.products.map((item, index) => (
-                  <li key={item.id}>{renderCard(item, index)}</li>
+                  <li key={`${block.subId}-${item.sku}-${index}`}>
+                    {renderCard(item, index)}
+                  </li>
                 ))}
               </ul>
             </div>

@@ -1,3 +1,4 @@
+import { isMissingProductImage } from "@/lib/images";
 import { mergeSpecs } from "@/lib/catalog/default-specs";
 import type { CatalogProduct } from "@/lib/catalog/types";
 import { pickProductTagChips } from "@/lib/product-tags";
@@ -17,7 +18,13 @@ export function catalogProductFromStrapiProductDetail(
   const gallery: string[] = [];
   for (const src of [p.imageUrl, ...(p.imageUrls ?? [])]) {
     const trimmed = src?.trim();
-    if (!trimmed || gallery.includes(trimmed)) continue;
+    if (
+      !trimmed ||
+      isMissingProductImage(trimmed) ||
+      gallery.includes(trimmed)
+    ) {
+      continue;
+    }
     gallery.push(trimmed);
   }
 
@@ -26,7 +33,7 @@ export function catalogProductFromStrapiProductDetail(
     sku: p.sku,
     name: p.name,
     description: p.description,
-    image: gallery[0] ?? p.imageUrl,
+    image: gallery[0] ?? "",
     gallery,
     imageAlt: p.imageAlt,
     mainCategoryId: main.id,

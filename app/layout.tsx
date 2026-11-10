@@ -25,6 +25,9 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = rootLayoutMetadata();
 
+/** CMS copy/media should not be stuck behind a static shell in dev or after Strapi edits. */
+export const dynamic = "force-dynamic";
+
 export default async function RootLayout({
   children,
 }: Readonly<{

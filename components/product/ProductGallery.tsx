@@ -2,6 +2,7 @@
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
+import { brandLogo } from "@/lib/images";
 import SafeImage from "../SafeImage";
 import styles from "../ProductListing.module.css";
 
@@ -21,6 +22,7 @@ export default function ProductGallery({
   eager,
   layout = "card",
 }: ProductGalleryProps) {
+  const slides = images.length > 0 ? images : [brandLogo.icon];
   const [index, setIndex] = useState(0);
   const [autoplayEpoch, setAutoplayEpoch] = useState(0);
   const [autoplayPaused, setAutoplayPaused] = useState(false);
@@ -29,26 +31,26 @@ export default function ProductGallery({
   useEffect(() => {
     setIndex(0);
     setAutoplayEpoch((n) => n + 1);
-  }, [images]);
+  }, [slides]);
 
   useEffect(() => {
-    if (images.length <= 1 || autoplayPaused) return;
+    if (slides.length <= 1 || autoplayPaused) return;
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduced) return;
 
     const timer = window.setInterval(() => {
-      setIndex((i) => (i + 1) % images.length);
+      setIndex((i) => (i + 1) % slides.length);
     }, SLIDE_MS);
 
     return () => clearInterval(timer);
-  }, [images.length, autoplayPaused, autoplayEpoch]);
+  }, [slides.length, autoplayPaused, autoplayEpoch]);
 
   const goTo = useCallback(
     (next: number) => {
-      setIndex((next + images.length) % images.length);
+      setIndex((next + slides.length) % slides.length);
       setAutoplayEpoch((n) => n + 1);
     },
-    [images.length]
+    [slides.length]
   );
 
   const sliderClass = isDetail ? styles.detailSlider : styles.slider;
@@ -73,7 +75,7 @@ export default function ProductGallery({
       }
     >
       <div className={sliderClass}>
-        {images.map((src, i) => (
+        {slides.map((src, i) => (
           <div
             key={`${src}-${i}`}
             className={i === index ? styles.slideActive : styles.slide}
@@ -94,7 +96,7 @@ export default function ProductGallery({
             />
           </div>
         ))}
-        {images.length > 1 && (
+        {slides.length > 1 && (
           <>
             {isDetail ? (
               <>
@@ -117,11 +119,11 @@ export default function ProductGallery({
               </>
             ) : null}
             <span className={styles.sliderCount} aria-live="polite">
-              {index + 1} / {images.length}
+              {index + 1} / {slides.length}
             </span>
             {!isDetail ? (
               <div className={styles.sliderDots}>
-                {images.map((_, i) => (
+                {slides.map((_, i) => (
                   <button
                     key={i}
                     type="button"
@@ -148,9 +150,9 @@ export default function ProductGallery({
           </>
         )}
       </div>
-      {isDetail && images.length > 1 ? (
+      {isDetail && slides.length > 1 ? (
         <ul className={styles.detailThumbs} aria-label="Gallery thumbnails">
-          {images.map((src, i) => (
+          {slides.map((src, i) => (
             <li key={`${src}-thumb-${i}`}>
               <button
                 type="button"

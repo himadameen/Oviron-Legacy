@@ -16,6 +16,29 @@
   inset: 0;
 }
 
+.mediaMotion {
+  position: absolute;
+  inset: 0;
+  transform: scale(1);
+  transform-origin: center center;
+  will-change: transform;
+  animation: campaignZoom 16s ease-in-out infinite;
+}
+
+.mediaMotionPaused {
+  animation-play-state: paused;
+}
+
+@keyframes campaignZoom {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.09);
+  }
+}
+
 .video,
 .poster {
   object-fit: cover;
@@ -101,6 +124,11 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .mediaMotion {
+    animation: none;
+    transform: scale(1);
+  }
+
   .playBtn:hover {
     transform: translate(-50%, -50%);
   }

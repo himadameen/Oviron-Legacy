@@ -9,9 +9,25 @@ export const brandLogo = {
 /** Bundled placeholders — always available offline. */
 export const imagePlaceholders = {
   hero: "/images/placeholder-hero.svg",
-  collection: "/images/placeholder-collection.svg",
+  /** Product / catalogue tiles — brand mark when API has no photo */
+  collection: brandLogo.icon,
   editorial: "/images/placeholder-editorial.svg",
+  logo: brandLogo.icon,
 } as const;
+
+const MISSING_PRODUCT_IMAGE = /oviron_seed_placeholder|placeholder-(collection|hero|editorial)\.svg/i;
+
+/** True when Strapi (or API) has no usable product photo. */
+export function isMissingProductImage(url?: string | null): boolean {
+  const trimmed = url?.trim() ?? "";
+  if (!trimmed) return true;
+  return MISSING_PRODUCT_IMAGE.test(trimmed);
+}
+
+/** Primary product image URL, or bundled Oviron logo. */
+export function productImageOrLogo(url?: string | null): string {
+  return isMissingProductImage(url) ? brandLogo.icon : url!.trim();
+}
 
 /** Set NEXT_PUBLIC_USE_REMOTE_IMAGES=true to load Unsplash URLs (browser-direct via SafeImage) */
 const useRemoteImages =
@@ -57,7 +73,7 @@ export const collectionImages = {
 } as const;
 
 export function placeholderFor(
-  kind: "hero" | "collection" | "editorial"
+  kind: "hero" | "collection" | "editorial" | "logo"
 ): string {
   return imagePlaceholders[kind];
 }
